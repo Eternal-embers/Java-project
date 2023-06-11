@@ -1,117 +1,114 @@
-package AddressBook;
-
 import java.util.Date;
 
 public class Person {
-	/* Êı¾İÓò,Ë½ÓĞ·â×°£¬Ö»ÄÜÔÚPersonÀàÖĞ·ÃÎÊ */
-	private String name;//ĞÕÃû
-	private String address;//µØÖ·
-	private String postalCode;//ÓÊÕş±àÂë
-	private String phoneNumber;//µç»°ºÅÂë
-	private String creationDate;//´´½¨ÈÕÆÚ
-	private String comment;//±¸×¢
-	
-	/************* ¹¹Ôì·½·¨ *************/
-	/* ÍêÕû´´½¨ */
-	public Person(String name,String address,String postalCode,String phoneNumber,String comment) {
-		this.name = name;
-		this.address = address;
-		this.postalCode = postalCode;
-		this.phoneNumber = phoneNumber;
-		this.comment = comment;
-		Date date = new Date();
-		//SimpleDateFormat time= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		this.creationDate = date.toString();//´´½¨ÈÕÆÚ
-	}
-	/* ¿ì½İ´´½¨ */
-	public Person(String name,String phoneNumber,String comment) {
-		this.name = name;
-		this.phoneNumber = phoneNumber;
-		this.comment = comment;
-		this.address = "null";
-		this.postalCode = "null";
-		Date date = new Date();
-		//SimpleDateFormat time= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		this.creationDate = date.toString();//´´½¨ÈÕÆÚ
-	}
-	/* ¶ÁÈ¡´´½¨ */
-	public Person(String name,String address,String postalCode,String phoneNumber,String creationDate,String comment) {
-		this.name = name;
-		this.address = address;
-		this.postalCode = postalCode;
-		this.phoneNumber = phoneNumber;
-		this.creationDate = creationDate;
-		this.comment = comment;
-	}
-	/************* ¹¹Ôì·½·¨ *************/
+    /* æ•°æ®åŸŸ,ç§æœ‰å°è£…ï¼Œåªèƒ½åœ¨Personç±»ä¸­è®¿é—® */
+    private String name;//å§“å
+    private String address;//åœ°å€
+    private String postalCode;//é‚®æ”¿ç¼–ç 
+    private String phoneNumber;//ç”µè¯å·ç 
+    private String creationDate;//åˆ›å»ºæ—¥æœŸ
+    private String comment;//å¤‡æ³¨
 
-	
-	/************* ·ÃÎÊÆ÷ *************/
-	public String getName() {
-		return this.name;
-	}
-	public String getAddress() {
-		return this.address;
-	}
-	public String getPostalCode() {
-		return this.postalCode;
-	}
-	public String getPhoneNumber() {
-		return this.phoneNumber;
-	}
-	public String getcreationDate() {
-		return this.creationDate;
-	}
-	public String getComment() {
-		return this.comment;
-	}
-	/************* ·ÃÎÊÆ÷ *************/
-	
-	
-	/************* ĞŞ¸ÄÆ÷ *************/
-	public void setName(String name) {
-		if(name != null && !name.isEmpty()) {
-			this.name = name;
-		}
-	}
-	public void setAddress(String address) {
-		if(name != null && !name.isEmpty()) {
-			this.address = address;
-		}
-	}
-	public void setPostalCode(String postalCode) {
-		if(name != null && !name.isEmpty()) {
-			this.postalCode = postalCode;
-		}
-	}
-	public void setPhoneNumber(String phoneNumber) {
-		if(name != null && !name.isEmpty()) {
-			this.phoneNumber = phoneNumber;
-		}
-	}
-	public void setCreationDate(String creationDate) {
-		if(name != null && !name.isEmpty()) {
-			this.creationDate = creationDate;
-		}
-	}
-	public void setComment(String comment) {
-		if(name != null && !name.isEmpty()) {
-			this.comment = comment;
-		}
-	}
-	/************* ĞŞ¸ÄÆ÷ *************/
-	
-	/************* ÏÔÊ¾¶ÔÏó *************/
-	public void showPerson() {
-		if(this != null) {
-			System.out.printf("\tĞÕÃû£º%s(%s)\n", name,comment);
-			if(address.compareTo("null") != 0) System.out.println("\tµØÖ·£º" + address);
-			if(postalCode.compareTo("null") != 0)System.out.println("\tÓÊÕş±àÂë£º" + postalCode);
-			System.out.println("\tµç»°ºÅÂë£º" + phoneNumber);
-			System.out.println("\t´´½¨ÈÕÆÚ£º" + creationDate);
-		}
-	}
-	/************* ÏÔÊ¾¶ÔÏó *************/
-	
+    /************* æ„é€ æ–¹æ³• *************/
+    /* å®Œæ•´åˆ›å»º */
+    public Person(String name,String address,String postalCode,String phoneNumber,String comment) {
+        this.name = name;
+        this.address = address;
+        this.postalCode = postalCode;
+        this.phoneNumber = phoneNumber;
+        this.comment = comment;
+        Date date = new Date();
+        //SimpleDateFormat time= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        this.creationDate = date.toString();//åˆ›å»ºæ—¥æœŸ
+    }
+    /* å¿«æ·åˆ›å»º */
+    public Person(String name,String phoneNumber,String comment) {
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.comment = comment;
+        this.address = "null";
+        this.postalCode = "null";
+        Date date = new Date();
+        //SimpleDateFormat time= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        this.creationDate = date.toString();//åˆ›å»ºæ—¥æœŸ
+    }
+    /* è¯»å–åˆ›å»º */
+    public Person(String name,String address,String postalCode,String phoneNumber,String creationDate,String comment) {
+        this.name = name;
+        this.address = address;
+        this.postalCode = postalCode;
+        this.phoneNumber = phoneNumber;
+        this.creationDate = creationDate;
+        this.comment = comment;
+    }
+    /************* æ„é€ æ–¹æ³• *************/
+
+
+    /************* è®¿é—®å™¨ *************/
+    public String getName() {
+        return this.name;
+    }
+    public String getAddress() {
+        return this.address;
+    }
+    public String getPostalCode() {
+        return this.postalCode;
+    }
+    public String getPhoneNumber() {
+        return this.phoneNumber;
+    }
+    public String getcreationDate() {
+        return this.creationDate;
+    }
+    public String getComment() {
+        return this.comment;
+    }
+    /************* è®¿é—®å™¨ *************/
+
+
+    /************* ä¿®æ”¹å™¨ *************/
+    public void setName(String name) {
+        if(name != null && !name.isEmpty()) {
+            this.name = name;
+        }
+    }
+    public void setAddress(String address) {
+        if(name != null && !name.isEmpty()) {
+            this.address = address;
+        }
+    }
+    public void setPostalCode(String postalCode) {
+        if(name != null && !name.isEmpty()) {
+            this.postalCode = postalCode;
+        }
+    }
+    public void setPhoneNumber(String phoneNumber) {
+        if(name != null && !name.isEmpty()) {
+            this.phoneNumber = phoneNumber;
+        }
+    }
+    public void setCreationDate(String creationDate) {
+        if(name != null && !name.isEmpty()) {
+            this.creationDate = creationDate;
+        }
+    }
+    public void setComment(String comment) {
+        if(name != null && !name.isEmpty()) {
+            this.comment = comment;
+        }
+    }
+    /************* ä¿®æ”¹å™¨ *************/
+
+    /************* æ˜¾ç¤ºå¯¹è±¡ *************/
+    public void showPerson() {
+        if(this != null) {
+            System.out.printf("\tå§“åï¼š%s(%s)\n", name,comment);
+            if(address.compareTo("null") != 0) System.out.println("\tåœ°å€ï¼š" + address);
+            if(postalCode.compareTo("null") != 0)System.out.println("\té‚®æ”¿ç¼–ç ï¼š" + postalCode);
+            System.out.println("\tç”µè¯å·ç ï¼š" + phoneNumber);
+            System.out.println("\tåˆ›å»ºæ—¥æœŸï¼š" + creationDate);
+        }
+    }
+    /************* æ˜¾ç¤ºå¯¹è±¡ *************/
+
 }
-

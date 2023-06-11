@@ -1,479 +1,451 @@
-package AddressBook;
-
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;//×·¼ÓÊı¾İµ½ÎÄ¼şÖĞ
-import java.io.IOException;//ÎÄ¼şÊäÈëÊä³öÒì³£
+import java.io.FileWriter;//è¿½åŠ æ•°æ®åˆ°æ–‡ä»¶ä¸­
+import java.io.IOException;//æ–‡ä»¶è¾“å…¥è¾“å‡ºå¼‚å¸¸
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.InputMismatchException;//ÊäÈë²»Æ¥ÅäÒì³£´¦Àí
+import java.util.InputMismatchException;//è¾“å…¥ä¸åŒ¹é…å¼‚å¸¸å¤„ç†
 import java.util.Scanner;
 
 public class AddressBook{
-	
-	Scanner input = new Scanner(System.in);//ÊäÈë
-	static Scanner userInput = new Scanner(System.in);//ÊäÈë
-	public AddressBook() {
-	}//¹¹Ôìº¯Êı
-	
-	/************* ²Ëµ¥ *************/
-	public void menu() {
+
+    Scanner input = new Scanner(System.in);//è¾“å…¥
+    static Scanner userInput = new Scanner(System.in);//è¾“å…¥
+    public AddressBook() {
+    }//æ„é€ å‡½æ•°
+
+    /************* èœå• *************/
+    public void menu() {
 		/*
 		System.out.println("\t______________________________________________________________");
 		System.out.println("\t*                                                            *");
 		System.out.println("\t*                ___________________________                 *");
 		System.out.println("\t*                |                         |                 *");
-		System.out.println("\t*                |         Í¨ĞÅÂ¼           |                 *");
+		System.out.println("\t*                |         é€šè®¯å½•           11|                 *");
 		System.out.println("\t*                |_________________________|                 *");
-		System.out.println("\t*                ²Ëµ¥£º                                       *");
-		System.out.println("\t*                ¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª               *");
+		System.out.println("\t*                èœå•ï¼š                                       *");
+		System.out.println("\t*                â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”               *");
 		System.out.println("\t*                *                           *               *");
-		System.out.println("\t*                *  ÍË³ö£º- - - - - - - -  0  *               *");
+		System.out.println("\t*                *  é€€å‡ºï¼š- - - - - - - -  0  *               *");
 		System.out.println("\t*                *                           *               *");
-		System.out.println("\t*                *  ÊäÈë£º- - - - - - - -  1  *               *");
+		System.out.println("\t*                *  è¾“å…¥ï¼š- - - - - - - -  1  *               *");
 		System.out.println("\t*                *                           *               *");
-		System.out.println("\t*                *  ÏÔÊ¾£º- - - - - - - -  2  *               *");
+		System.out.println("\t*                *  æ˜¾ç¤ºï¼š- - - - - - - -  2  *               *");
 		System.out.println("\t*                *                           *               *");
-		System.out.println("\t*                *  ĞŞ¸Ä£º- - - - - - - -  3  *               *");
+		System.out.println("\t*                *  ä¿®æ”¹ï¼š- - - - - - - -  3  *               *");
 		System.out.println("\t*                *                           *               *");
-		System.out.println("\t*                *  É¾³ı£º- - - - - - - -  4  *               *");
+		System.out.println("\t*                *  åˆ é™¤ï¼š- - - - - - - -  4  *               *");
 		System.out.println("\t*                *                           *               *");
-		System.out.println("\t*                *  ²éÑ¯£º- - - - - - - -  5  *               *");
-		System.out.println("\t*                ¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª               *");
+		System.out.println("\t*                *  æŸ¥è¯¢ï¼š- - - - - - - -  5  *               *");
+		System.out.println("\t*                â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”               *");
 		System.out.println("\t*                                                            *");
 		System.out.println("\t*____________________________________________________________*");
 		System.out.print("\t>>");
 		*/
-		
-		System.out.println("\t                  ___________________________");
-		System.out.println("\t                  |                         |");
-		System.out.println("\t                  |         Í¨ĞÅÂ¼           |");
-		System.out.println("\t                  |_________________________|");
-		System.out.println("\t                  ²Ëµ¥£º");
-		System.out.println("\t            ¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª");
-		System.out.println("\t            |     *  ÍË³ö£º- - - - - - - -  0        |\n");
-		System.out.println("\t            |     *  ÊäÈë£º- - - - - - - -  1        |\n");
-		System.out.println("\t            |     *  ÏÔÊ¾£º- - - - - - - -  2        |\n");
-		System.out.println("\t            |     *  ĞŞ¸Ä£º- - - - - - - -  3        |\n");
-		System.out.println("\t            |     *  É¾³ı£º- - - - - - - -  4        |\n");
-		System.out.println("\t            |     *  ²éÑ¯£º- - - - - - - -  5        |\n");
-		System.out.println("\t            ¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª");
-		System.out.print("\t>>");
-		
+
+        System.out.println("\t                  ___________________________");
+        System.out.println("\t                  |                         |");
+        System.out.println("\t                  |          é€šä¿¡å½•          |");
+        System.out.println("\t                  |_________________________|");
+        System.out.println("\t                  èœå•ï¼š");
+        System.out.println("\t                  *  é€€å‡ºï¼š- - - - - - - -  0\n");
+        System.out.println("\t                  *  è¾“å…¥ï¼š- - - - - - - -  1\n");
+        System.out.println("\t                  *  æ˜¾ç¤ºï¼š- - - - - - - -  2\n");
+        System.out.println("\t                  *  ä¿®æ”¹ï¼š- - - - - - - -  3\n");
+        System.out.println("\t                  *  åˆ é™¤ï¼š- - - - - - - -  4\n");
+        System.out.println("\t                  *  æŸ¥è¯¢ï¼š- - - - - - - -  5\n");
+        System.out.print("\t>>");
+
 		/*
 		System.out.println("\t\n");
-		System.out.println("\t                ²Ëµ¥£º");
-		System.out.println("\t                * ÍË³ö£º- - - - - - - -  0\n");
-		System.out.println("\t                * ÊäÈë£º- - - - - - - -  1\n");
-		System.out.println("\t                * ÏÔÊ¾£º- - - - - - - -  2\n");
-		System.out.println("\t                * ĞŞ¸Ä£º- - - - - - - -  3\n");
-		System.out.println("\t                * É¾³ı£º- - - - - - - -  4\n");
-		System.out.println("\t                * ²éÑ¯£º- - - - - - - -  5\n");
+		System.out.println("\t                èœå•ï¼š");
+		System.out.println("\t                * é€€å‡ºï¼š- - - - - - - -  0\n");
+		System.out.println("\t                * è¾“å…¥ï¼š- - - - - - - -  1\n");
+		System.out.println("\t                * æ˜¾ç¤ºï¼š- - - - - - - -  2\n");
+		System.out.println("\t                * ä¿®æ”¹ï¼š- - - - - - - -  3\n");
+		System.out.println("\t                * åˆ é™¤ï¼š- - - - - - - -  4\n");
+		System.out.println("\t                * æŸ¥è¯¢ï¼š- - - - - - - -  5\n");
 		System.out.print("\t>>");
 		*/
-	}
-	
-	/************* ÍêÕûÊäÈë *************/
-	public Person completeInput() {
-		String name;//ĞÕÃû
-		String address;//µØÖ·
-		String postalCode;//ÓÊÕş±àÂë
-		String phoneNumber;//µç»°ºÅÂë
-		String comment;//±¸×¢
-		System.out.print("\tĞÕÃû£º");
-		name = input.nextLine();
-		System.out.print("\tµØÖ·£º");
-		address = input.nextLine();
-		System.out.print("\tÓÊÕş±àÂë£º");
-		postalCode = input.nextLine();
-		System.out.print("\tµç»°ºÅÂë£º");
-		phoneNumber = input.nextLine();
-		System.out.print("\t±¸×¢£º");
-		comment = input.nextLine();
-		return new Person(name,address,postalCode,phoneNumber,comment);
-	}
-	/************* ¿ì½İÊäÈë *************/
-	public Person quickInput() {
-		String name;//ĞÕÃû
-		String phoneNumber;//µç»°ºÅÂë
-		String comment;//±¸×¢
-		System.out.print("\tĞÕÃû£º");
-		name = input.nextLine();
-		System.out.print("\tµç»°ºÅÂë£º");
-		phoneNumber = input.nextLine();
-		System.out.print("\t±¸×¢£º");
-		comment = input.nextLine();
-		return new Person(name,phoneNumber,comment);
-	}
-	
-	/************* ±£´æÊı¾İ ***************/
-	public void save(FileWriter output,Person person) throws IOException{
-		/* 
-		 * ±£´æË³Ğò£ºname->address->postalCode->phoneNumber->creationDate->comment
-		 */
-		output.write(person.getName() + "\n");
-		output.write(person.getAddress() + "\n");
-		output.write(person.getPostalCode() + "\n");
-		output.write(person.getPhoneNumber() + "\n");
-		output.write(person.getcreationDate() + "\n");
-		output.write(person.getComment() + "\n");
-		output.flush();
-	}//×·¼Ó
-	
-	public void cover(PrintWriter output,Person person) throws IOException {
-		/* 
-		 * ±£´æË³Ğò£ºname->address->postalCode->phoneNumber->creationDate->comment
-		 */
-		output.write(person.getName() + "\n");
-		output.write(person.getAddress() + "\n");
-		output.write(person.getPostalCode() + "\n");
-		output.write(person.getPhoneNumber() + "\n");
-		output.write(person.getcreationDate() + "\n");
-		output.write(person.getComment() + "\n");
-		output.flush();
-	}//¸²¸Ç
-	
-	/************* ÓÃ»§ÊäÈë **************/
-	@SuppressWarnings("resource")
-	public void input() throws IOException,InputMismatchException{
-		Person[] person = new Person[50];//person¶ÔÏó
-		FileWriter output = new FileWriter("D:\\programming\\eclipse\\Í¨ĞÅÂ¼\\data\\addressBook.txt",true);
-		int size = 0;
-		System.out.println("\t¿ì½İÊäÈë:ĞÕÃû - µç»°ºÅÂë - ±¸×¢  >>1");
-		System.out.println("\tÍêÕûÊäÈë:ĞÕÃû - µØÖ· - ÓÊÕş±àºÅ - µç»°ºÅÂë - ±¸×¢  >>2");
-		System.out.println("\t·µ»Ø >>3");
-		int flag = 0;
-		try {
-			System.out.print("\t>>");
-			flag = userInput.nextInt();
-		}
-		catch(InputMismatchException ex) {
-			System.out.println("\t>>>>>>> ÊäÈë´íÎó£¬ÇëÖØĞÂÊäÈë£¡ <<<<<<<");
-			System.out.print("\t>>");
-			userInput.nextLine();//Çå¿Õ»º³åÇø
-			flag = userInput.nextInt();
-		}
-		if(flag == 1) {//¿ì½İÊäÈë
-			while(flag != 0){
-				System.out.println("\t¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª"
-								  	+ "¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª");
-				person[size++] = quickInput();//ÊäÈëÒ»×éÊı¾İ
-				try {
-					System.out.print("\tÊÇ·ñ¼ÌĞøÊäÈë£¿(¼ÌĞø1/½áÊø0) >>");
-					flag = userInput.nextInt();
-				}
-				catch(InputMismatchException ex) {
-					System.out.println("\t>>>>>>> ÊäÈë´íÎó£¬ÇëÖØĞÂÊäÈë£¡ <<<<<<<");
-					System.out.print("\tÊÇ·ñ¼ÌĞøÊäÈë£¿(¼ÌĞø1/½áÊø0) >>");
-					userInput.nextLine();//Çå¿Õ»º³åÇø
-					flag = userInput.nextInt();
-				}
-			}
-			System.out.println("\t>>> ÊäÈë½áÊø <<<");
-			System.out.println("\t>>>>>>> ÊäÈëÇé¿ö  <<<<<<<");
-			//Êä³öÊäÈëµÄĞÅÏ¢
-			for(int i = 0;i < size;i++) {
-				System.out.println("\t¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª"
-						   			+ "¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª");
-				person[i].showPerson();
-			}
-			//Ğ´Èëµ½ÎÄ¼şÖĞ
-			for(int i = 0;i < size;i++) {
-				save(output,person[i]);
-			}
-			return;
-		}
-		else if(flag == 2) {//ÍêÕûÊäÈë
-			while(flag != 0){
-				System.out.println("\t¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª"
-								   + "¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª");
-				person[size++] = completeInput();//ÊäÈëÒ»×éÊı¾İ
-				try {
-					System.out.print("\tÊÇ·ñ¼ÌĞøÊäÈë£¿(¼ÌĞø1/½áÊø0) >>");
-					flag = userInput.nextInt();
-				}
-				catch(InputMismatchException ex) {
-					System.out.println("\t>>>>>>> ÊäÈë´íÎó£¬ÇëÖØĞÂÊäÈë£¡ <<<<<<<");
-					System.out.print("\tÊÇ·ñ¼ÌĞøÊäÈë£¿(¼ÌĞø1/½áÊø0) >>");
-					userInput.nextLine();//Çå¿Õ»º³åÇø
-					flag = userInput.nextInt();
-				}
-			}
-			System.out.println("\t>>> ÊäÈë½áÊø <<<");
-			System.out.println("\t>>>>>>> ÊäÈëÇé¿ö  <<<<<<<");
-			//Êä³öÊäÈëµÄĞÅÏ¢
-			for(int i = 0;i < size;i++) {
-				System.out.println("\t¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª"
-						   			+ "¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª");
-				person[i].showPerson();
-			}
-			//Ğ´Èëµ½ÎÄ¼şÖĞ
-			for(int i = 0;i < size;i++) {
-				save(output,person[i]);
-			}
-			output.close();//¹Ø±ÕÎÄ¼şÊä³ö
-		}
-		else if(flag == 3) {
-			return;//·µ»Ø
-		}
-		else {//ÊäÈë´íÎó
-			System.out.println("\tÊäÈë´íÎó£¬ÒÑ×Ô¶¯·µ»ØÖ÷²Ëµ¥¡£");
-		}
-		output.close();//¹Ø±ÕÎÄ¼şÊä³ö
-	}
-	
-	public void show(File file) throws FileNotFoundException {
-		//ÅĞ¶ÏfileÊÇ·ñ´æÔÚ
-		try {
-			Scanner temp = new Scanner(file);
-			temp.close();
-		}
-		catch (FileNotFoundException ex) {
-			//Èç¹ûÎÄ¼ş²»´æÔÚ£¬ÔòÓÃ»§ÊÖ¶¯ÊäÈëÎÄ¼ş¾ø¶ÔµØÖ·
-			System.out.println("ÎÄ¼ş²»´æÔÚ£¡ÇëÊäÈëĞÂµÄÎÄ¼şµØÖ·(¾ø¶ÔµØÖ·):");
-			file = new File(userInput.nextLine());
-		}
-		Scanner fileInput = new Scanner(file);//´Ë´¦¿ÉÄÜÅ×³öÎÄ¼ş²»´æÔÚÒì³££¬Î´´¦Àí
-		String name;//ĞÕÃû
-		String address;//µØÖ·
-		String postalCode;//ÓÊÕş±àÂë
-		String phoneNumber;//µç»°ºÅÂë
-		String creationDate;//´´½¨ÈÕÆÚ
-		String comment;//±¸×¢
-		while(fileInput.hasNextLine()) {
-			name = fileInput.nextLine();
-			address = fileInput.nextLine();
-			postalCode = fileInput.nextLine();
-			phoneNumber = fileInput.nextLine();
-			creationDate = fileInput.nextLine();
-			comment = fileInput.nextLine();
-			System.out.println("\t¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª");
-			System.out.printf("\tĞÕÃû£º%s(%s)\n", name,comment);
-			if(address.compareTo("null") != 0) System.out.println("\tµØÖ·£º" + address);
-			if(postalCode.compareTo("null") != 0)System.out.println("\tÓÊÕş±àÂë£º" + postalCode);
-			System.out.println("\tµç»°ºÅÂë£º" + phoneNumber);
-			System.out.println("\t´´½¨ÈÕÆÚ£º" + creationDate);
-		}
-		System.out.println("\t¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª");
-		fileInput.close();
-		userInput.nextLine();//µÈ´ıÓÃ»§»Ø³µ
-		userInput.nextLine();//µÈ´ıÓÃ»§»Ø³µ
-	}
-	
-	public void change(File file) throws IOException {
-		ArrayList<Person> personArray = new ArrayList<Person>();
-		Scanner fileInput = new Scanner(file);
-		while(fileInput.hasNextLine()) {
-			personArray.add(new Person(fileInput.nextLine(),fileInput.nextLine(),fileInput.nextLine(),
-						fileInput.nextLine(),fileInput.nextLine(),fileInput.nextLine()));
-		}
-		fileInput.close();//¹Ø±ÕÎÄ¼şÊäÈë
-		for(int i = 0;i < personArray.size();i++) {
-			System.out.println("\t¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª");
-			System.out.printf("\t< %d >\n",i);
-			personArray.get(i).showPerson();
-		}
-		System.out.println("\t¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª");
-		int flag = 1;
-		int number = -1;
-		while(flag != 0){
-			try {
-				System.out.print("\tÇëÊäÈëÒªĞŞ¸ÄµÄÊı¾İ×é±àºÅ(ÊäÈë¸ºÊı·µ»ØÖ÷²Ëµ¥):");
-				number = userInput.nextInt();
-			}
-			catch(InputMismatchException ex) {
-				System.out.println("\t>>>>>>> ÊäÈë´íÎó£¬ÇëÖØĞÂÊäÈë£¡ <<<<<<<");
-				System.out.print("\tÇëÊäÈëÒªĞŞ¸ÄµÄÊı¾İ×é±àºÅ(ÊäÈë¸ºÊı·µ»ØÖ÷²Ëµ¥):");
-				userInput.nextLine();//Çå¿Õ»º³åÇø
-				number = userInput.nextInt();
-			}
-			if(number < 0) {
-				System.out.println("\t·µ»ØÖ÷²Ëµ¥³É¹¦,ÄúÖ®Ç°ËùÓĞĞŞ¸Ä²Ù×÷ÒÑ±»È¡Ïû£¡");
-				return; 
-			}
-			Person t = personArray.get(number);//tÓÃÀ´»ñÈ¡person¶ÔÏóµÄÒıÓÃ
-			userInput.nextLine();
-			System.out.println("\t************************************************");
-			System.out.print("\tĞÕÃû£º" + t.getName() + "->" );
-			t.setName(userInput.nextLine());
-			System.out.print("\tµØÖ·£º" + t.getAddress() + "->");
-			t.setAddress(userInput.nextLine());
-			System.out.print("\tÓÊÕş±àÂë£º" + t.getPostalCode() + "->");
-			t.setPostalCode(userInput.nextLine());
-			System.out.print("\tµç»°ºÅÂë£º" + t.getPhoneNumber() + "->");
-			t.setPhoneNumber(userInput.nextLine());
-			System.out.print("\t´´½¨ÈÕÆÚ£º" + t.getcreationDate() + "->");
-			t.setCreationDate(userInput.nextLine());
-			System.out.print("\t±¸×¢£º" + t.getComment() + "->");
-			t.setComment(userInput.nextLine());
-			System.out.println("\t************************************************");
-			try {
-				System.out.print("\tÊÇ·ñ¼ÌĞøÊäÈë£¿(¼ÌĞø1/½áÊø0) >>");
-				flag = userInput.nextInt();
-			}
-			catch(InputMismatchException ex) {
-				System.out.println("\t>>>>>>> ÊäÈë´íÎó£¬ÇëÖØĞÂÊäÈë£¡ <<<<<<<");
-				System.out.print("\tÊÇ·ñ¼ÌĞøÊäÈë£¿(¼ÌĞø1/½áÊø0) >>");
-				userInput.nextLine();//Çå¿Õ»º³åÇø
-				flag = userInput.nextInt();
-			}
-		}
-		System.out.println("\t>>>>>>>  ĞŞ¸Ä³É¹¦!  <<<<<<<");
-		//½«ĞŞ¸ÄºóµÄÊı¾İĞ´Èëµ½ÎÄ¼şÖĞ£¬PrintWriterÊµÏÖ¸²¸Ç
-		PrintWriter writer = new PrintWriter(file);//¸²¸ÇÔ­ÏÈÊı¾İ
-		for (Person person : personArray)  {//ÔöÇ¿ĞÍµÄfor
-			cover(writer, person);
-		}
-		writer.close();//¹Ø±ÕÎÄ¼şĞ´Èë
-	}
-	
-	public void delete(File file) throws IOException {
-		ArrayList<Person> personArray = new ArrayList<Person>();
-		Scanner fileInput = new Scanner(file);
-		while(fileInput.hasNextLine()) {
-			personArray.add(new Person(fileInput.nextLine(),fileInput.nextLine(),fileInput.nextLine(),
-						fileInput.nextLine(),fileInput.nextLine(),fileInput.nextLine()));
-		}
-		fileInput.close();//¹Ø±ÕÎÄ¼şÊäÈë
-		int flag = 1;
-		while(flag != 0){
-			for(int i = 0;i < personArray.size();i++) {
-				System.out.println("\t¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª");
-				System.out.printf("\t< %d >\n",i);
-				personArray.get(i).showPerson();
-			}
-			System.out.println("\t¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª");
-			int number = -1;
-			try {
-				System.out.print("\tÇëÊäÈëÒªÉ¾³ıµÄÊı¾İ×é±àºÅ(ÊäÈë¸ºÊı·µ»ØÖ÷²Ëµ¥):");
-				number = userInput.nextInt();
-			}
-			catch(InputMismatchException ex) {
-				System.out.println("\t>>>>>>> ÊäÈë´íÎó£¬ÇëÖØĞÂÊäÈë£¡ <<<<<<<");
-				System.out.print("\tÇëÊäÈëÒªÉ¾³ıµÄÊı¾İ×é±àºÅ(ÊäÈë¸ºÊı·µ»ØÖ÷²Ëµ¥):");
-				userInput.nextLine();//Çå¿Õ»º³åÇø
-				number = userInput.nextInt();
-			}
-			if(number < 0) {
-				System.out.println("\t·µ»ØÖ÷²Ëµ¥³É¹¦,ÄúÖ®Ç°ËùÓĞÉ¾³ı²Ù×÷ÒÑ±»È¡Ïû£¡");
-				return; 
-			}
-			personArray.remove(number);//É¾³ı±àºÅÎªnumberµÄÊı¾İ×é
-			try {
-				System.out.print("\tÊÇ·ñ¼ÌĞøÊäÈë£¿(¼ÌĞø1/½áÊø0) >>");
-				flag = userInput.nextInt();
-			}
-			catch(InputMismatchException ex) {
-				System.out.println("\t>>>>>>> ÊäÈë´íÎó£¬ÇëÖØĞÂÊäÈë£¡ <<<<<<<");
-				System.out.print("\tÊÇ·ñ¼ÌĞøÊäÈë£¿(¼ÌĞø1/½áÊø0) >>");
-				userInput.nextLine();//Çå¿Õ»º³åÇø
-				flag = userInput.nextInt();
-			}
-		}
-		System.out.println("\t>>>>>>>  É¾³ı³É¹¦!  <<<<<<<");
-		//½«ĞŞ¸ÄºóµÄÊı¾İĞ´Èëµ½ÎÄ¼şÖĞ£¬PrintWriterÊµÏÖ¸²¸Ç
-		PrintWriter writer = new PrintWriter(file);//¸²¸ÇÔ­ÏÈÊı¾İ
-		for (Person person : personArray)  {//ÔöÇ¿ĞÍµÄfor
-			cover(writer, person);
-		}
-		writer.close();//¹Ø±ÕÎÄ¼şĞ´Èë
-	}
-	
-	public boolean isContain(Person data,String keywords) {
-		if(data.getName().contains(keywords)) return true;
-		if(data.getAddress().contains(keywords)) return true;
-		if(data.getPostalCode().contains(keywords)) return true;
-		if(data.getPhoneNumber().contains(keywords)) return true;
-		if(data.getcreationDate().contains(keywords)) return true;
-		if(data.getComment().contains(keywords)) return true;
-		return false;
-	}
-	public void search(File file) throws IOException {
-		ArrayList<Person> personArray = new ArrayList<Person>();
-		Scanner fileInput = new Scanner(file);
-		while(fileInput.hasNextLine()) {
-			personArray.add(new Person(fileInput.nextLine(),fileInput.nextLine(),fileInput.nextLine(),
-						fileInput.nextLine(),fileInput.nextLine(),fileInput.nextLine()));
-		}
-		fileInput.close();
-		userInput.nextLine();
-		System.out.println("\tÇëÊäÈë¹Ø¼ü´Ê(ÊäÈëend·µ»ØÖ÷²Ëµ¥):");
-		System.out.print("\t>>>");
-		String keywords = userInput.nextLine();
-		if(keywords.contains("end")) {
-			System.out.println("\t·µ»ØÖ÷²Ëµ¥³É¹¦!");
-			return;
-		}
-		boolean flag =  false;//ÅĞ¶ÏËÑË÷ÊÇ·ñÓĞ½á¹û
-		for (Person person : personArray) {//ÔöÇ¿ĞÍµÄfor
+    }
+
+    /************* å®Œæ•´è¾“å…¥ *************/
+    public Person completeInput() {
+        String name;//å§“å
+        String address;//åœ°å€
+        String postalCode;//é‚®æ”¿ç¼–ç 
+        String phoneNumber;//ç”µè¯å·ç 
+        String comment;//å¤‡æ³¨
+        System.out.print("\tå§“åï¼š");
+        name = input.nextLine();
+        System.out.print("\tåœ°å€ï¼š");
+        address = input.nextLine();
+        System.out.print("\té‚®æ”¿ç¼–ç ï¼š");
+        postalCode = input.nextLine();
+        System.out.print("\tç”µè¯å·ç ï¼š");
+        phoneNumber = input.nextLine();
+        System.out.print("\tå¤‡æ³¨ï¼š");
+        comment = input.nextLine();
+        return new Person(name,address,postalCode,phoneNumber,comment);
+    }
+    /************* å¿«æ·è¾“å…¥ *************/
+    public Person quickInput() {
+        String name;//å§“å
+        String phoneNumber;//ç”µè¯å·ç 
+        String comment;//å¤‡æ³¨
+        System.out.print("\tå§“åï¼š");
+        name = input.nextLine();
+        System.out.print("\tç”µè¯å·ç ï¼š");
+        phoneNumber = input.nextLine();
+        System.out.print("\tå¤‡æ³¨ï¼š");
+        comment = input.nextLine();
+        return new Person(name,phoneNumber,comment);
+    }
+
+    /************* ä¿å­˜æ•°æ® ***************/
+    public void save(FileWriter output,Person person) throws IOException{
+        /*
+         * ä¿å­˜é¡ºåºï¼šname->address->postalCode->phoneNumber->creationDate->comment
+         */
+        output.write(person.getName() + "\n");
+        output.write(person.getAddress() + "\n");
+        output.write(person.getPostalCode() + "\n");
+        output.write(person.getPhoneNumber() + "\n");
+        output.write(person.getcreationDate() + "\n");
+        output.write(person.getComment() + "\n");
+        output.flush();
+    }//è¿½åŠ 
+
+    public void cover(PrintWriter output,Person person) {
+        /*
+         * ä¿å­˜é¡ºåºï¼šname->address->postalCode->phoneNumber->creationDate->comment
+         */
+        output.write(person.getName() + "\n");
+        output.write(person.getAddress() + "\n");
+        output.write(person.getPostalCode() + "\n");
+        output.write(person.getPhoneNumber() + "\n");
+        output.write(person.getcreationDate() + "\n");
+        output.write(person.getComment() + "\n");
+        output.flush();
+    }//è¦†ç›–
+
+    /************* ç”¨æˆ·è¾“å…¥ **************/
+    public void input() throws IOException,InputMismatchException{
+        Person[] person = new Person[50];//personå¯¹è±¡
+        FileWriter output = new FileWriter("D:\\programming\\eclipse\\AddressBook\\data\\addressBook.txt",true);
+        int size = 0;
+        System.out.println("\tå¿«æ·è¾“å…¥:å§“å - ç”µè¯å·ç  - å¤‡æ³¨  >>1");
+        System.out.println("\tå®Œæ•´è¾“å…¥:å§“å - åœ°å€ - é‚®æ”¿ç¼–å· - ç”µè¯å·ç  - å¤‡æ³¨  >>2");
+        System.out.println("\tè¿”å› >>3");
+        int flag = 0;
+        try {
+            System.out.print("\t>>");
+            flag = userInput.nextInt();
+        }
+        catch(InputMismatchException ex) {
+            System.out.println("\t>>>>>>> è¾“å…¥é”™è¯¯ï¼Œè¯·é‡æ–°è¾“å…¥ï¼ <<<<<<<");
+            System.out.print("\t>>");
+            userInput.nextLine();//æ¸…ç©ºç¼“å†²åŒº
+            flag = userInput.nextInt();
+        }
+        if(flag == 1) {//å¿«æ·è¾“å…¥
+            while(flag != 0){
+                System.out.println("\tâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”"
+                        + "â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”");
+                person[size++] = quickInput();//è¾“å…¥ä¸€ç»„æ•°æ®
+                try {
+                    System.out.print("\tæ˜¯å¦ç»§ç»­è¾“å…¥ï¼Ÿ(ç»§ç»­1/ç»“æŸ0) >>");
+                    flag = userInput.nextInt();
+                }
+                catch(InputMismatchException ex) {
+                    System.out.println("\t>>>>>>> è¾“å…¥é”™è¯¯ï¼Œè¯·é‡æ–°è¾“å…¥ï¼ <<<<<<<");
+                    System.out.print("\tæ˜¯å¦ç»§ç»­è¾“å…¥ï¼Ÿ(ç»§ç»­1/ç»“æŸ0) >>");
+                    userInput.nextLine();//æ¸…ç©ºç¼“å†²åŒº
+                    flag = userInput.nextInt();
+                }
+            }
+            System.out.println("\t>>> è¾“å…¥ç»“æŸ <<<");
+            System.out.println("\t>>>>>>> è¾“å…¥æƒ…å†µ  <<<<<<<");
+            //è¾“å‡ºè¾“å…¥çš„ä¿¡æ¯
+            for(int i = 0;i < size;i++) {
+                System.out.println("\tâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”"
+                        + "â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”");
+                person[i].showPerson();
+            }
+            //å†™å…¥åˆ°æ–‡ä»¶ä¸­
+            for(int i = 0;i < size;i++) {
+                save(output,person[i]);
+            }
+            return;
+        }
+        else if(flag == 2) {//å®Œæ•´è¾“å…¥
+            while(flag != 0){
+                System.out.println("\tâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”"
+                        + "â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”");
+                person[size++] = completeInput();//è¾“å…¥ä¸€ç»„æ•°æ®
+                try {
+                    System.out.print("\tæ˜¯å¦ç»§ç»­è¾“å…¥ï¼Ÿ(ç»§ç»­1/ç»“æŸ0) >>");
+                    flag = userInput.nextInt();
+                }
+                catch(InputMismatchException ex) {
+                    System.out.println("\t>>>>>>> è¾“å…¥é”™è¯¯ï¼Œè¯·é‡æ–°è¾“å…¥ï¼ <<<<<<<");
+                    System.out.print("\tæ˜¯å¦ç»§ç»­è¾“å…¥ï¼Ÿ(ç»§ç»­1/ç»“æŸ0) >>");
+                    userInput.nextLine();//æ¸…ç©ºç¼“å†²åŒº
+                    flag = userInput.nextInt();
+                }
+            }
+            System.out.println("\t>>> è¾“å…¥ç»“æŸ <<<");
+            System.out.println("\t>>>>>>> è¾“å…¥æƒ…å†µ  <<<<<<<");
+            //è¾“å‡ºè¾“å…¥çš„ä¿¡æ¯
+            for(int i = 0;i < size;i++) {
+                System.out.println("\tâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”"
+                        + "â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”");
+                person[i].showPerson();
+            }
+            //å†™å…¥åˆ°æ–‡ä»¶ä¸­
+            for(int i = 0;i < size;i++) {
+                save(output,person[i]);
+            }
+            output.close();//å…³é—­æ–‡ä»¶è¾“å‡º
+        }
+        else if(flag == 3) {
+            return;
+        }
+        else {//è¾“å…¥é”™è¯¯
+            System.out.println("\tè¾“å…¥é”™è¯¯ï¼Œå·²è‡ªåŠ¨è¿”å›ä¸»èœå•ã€‚");
+        }
+        output.close();//å…³é—­æ–‡ä»¶è¾“å‡º
+    }
+
+    public void show(File file) throws FileNotFoundException {
+        //åˆ¤æ–­fileæ˜¯å¦å­˜åœ¨
+        try {
+            Scanner temp = new Scanner(file);
+            temp.close();
+        }
+        catch (FileNotFoundException ex) {
+            //å¦‚æœæ–‡ä»¶ä¸å­˜åœ¨ï¼Œåˆ™ç”¨æˆ·æ‰‹åŠ¨è¾“å…¥æ–‡ä»¶ç»å¯¹åœ°å€
+            System.out.println("æ–‡ä»¶ä¸å­˜åœ¨ï¼è¯·è¾“å…¥æ–°çš„æ–‡ä»¶åœ°å€(ç»å¯¹åœ°å€):");
+            file = new File(userInput.nextLine());
+        }
+        Scanner fileInput = new Scanner(file);//æ­¤å¤„å¯èƒ½æŠ›å‡ºæ–‡ä»¶ä¸å­˜åœ¨å¼‚å¸¸ï¼Œæœªå¤„ç†
+        String name;//å§“å
+        String address;//åœ°å€
+        String postalCode;//é‚®æ”¿ç¼–ç 
+        String phoneNumber;//ç”µè¯å·ç 
+        String creationDate;//åˆ›å»ºæ—¥æœŸ
+        String comment;//å¤‡æ³¨
+        while(fileInput.hasNextLine()) {
+            name = fileInput.nextLine();
+            address = fileInput.nextLine();
+            postalCode = fileInput.nextLine();
+            phoneNumber = fileInput.nextLine();
+            creationDate = fileInput.nextLine();
+            comment = fileInput.nextLine();
+            System.out.println("\tâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”");
+            System.out.printf("\tå§“åï¼š%s(%s)\n", name,comment);
+            if(address.compareTo("null") != 0) System.out.println("\tåœ°å€ï¼š" + address);
+            if(postalCode.compareTo("null") != 0)System.out.println("\té‚®æ”¿ç¼–ç ï¼š" + postalCode);
+            System.out.println("\tç”µè¯å·ç ï¼š" + phoneNumber);
+            System.out.println("\tåˆ›å»ºæ—¥æœŸï¼š" + creationDate);
+        }
+        System.out.println("\tâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”");
+        fileInput.close();
+        userInput.nextLine();//ç­‰å¾…ç”¨æˆ·å›è½¦
+        userInput.nextLine();//ç­‰å¾…ç”¨æˆ·å›è½¦
+    }
+
+    public void change(File file) throws IOException {
+        ArrayList<Person> personArray = new ArrayList<>();
+        Scanner fileInput = new Scanner(file);
+        while(fileInput.hasNextLine()) {
+            personArray.add(new Person(fileInput.nextLine(),fileInput.nextLine(),fileInput.nextLine(),
+                    fileInput.nextLine(),fileInput.nextLine(),fileInput.nextLine()));
+        }
+        fileInput.close();//å…³é—­æ–‡ä»¶è¾“å…¥
+        for(int i = 0;i < personArray.size();i++) {
+            System.out.println("\tâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”");
+            System.out.printf("\t< %d >\n",i);
+            personArray.get(i).showPerson();
+        }
+        System.out.println("\tâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”");
+        int flag = 1;
+        int number = -1;
+        while(flag != 0){
+            try {
+                System.out.print("\tè¯·è¾“å…¥è¦ä¿®æ”¹çš„æ•°æ®ç»„ç¼–å·(è¾“å…¥è´Ÿæ•°è¿”å›ä¸»èœå•):");
+                number = userInput.nextInt();
+            }
+            catch(InputMismatchException ex) {
+                System.out.println("\t>>>>>>> è¾“å…¥é”™è¯¯ï¼Œè¯·é‡æ–°è¾“å…¥ï¼ <<<<<<<");
+                System.out.print("\tè¯·è¾“å…¥è¦ä¿®æ”¹çš„æ•°æ®ç»„ç¼–å·(è¾“å…¥è´Ÿæ•°è¿”å›ä¸»èœå•):");
+                userInput.nextLine();//æ¸…ç©ºç¼“å†²åŒº
+                number = userInput.nextInt();
+            }
+            if(number < 0) {
+                System.out.println("\tè¿”å›ä¸»èœå•æˆåŠŸ,æ‚¨ä¹‹å‰æ‰€æœ‰ä¿®æ”¹æ“ä½œå·²è¢«å–æ¶ˆï¼");
+                return;
+            }
+            Person t = personArray.get(number);//tç”¨æ¥è·å–personå¯¹è±¡çš„å¼•ç”¨
+            userInput.nextLine();
+            System.out.println("\t************************************************");
+            System.out.print("\tå§“åï¼š" + t.getName() + "->" );
+            t.setName(userInput.nextLine());
+            System.out.print("\tåœ°å€ï¼š" + t.getAddress() + "->");
+            t.setAddress(userInput.nextLine());
+            System.out.print("\té‚®æ”¿ç¼–ç ï¼š" + t.getPostalCode() + "->");
+            t.setPostalCode(userInput.nextLine());
+            System.out.print("\tç”µè¯å·ç ï¼š" + t.getPhoneNumber() + "->");
+            t.setPhoneNumber(userInput.nextLine());
+            System.out.print("\tåˆ›å»ºæ—¥æœŸï¼š" + t.getcreationDate() + "->");
+            t.setCreationDate(userInput.nextLine());
+            System.out.print("\tå¤‡æ³¨ï¼š" + t.getComment() + "->");
+            t.setComment(userInput.nextLine());
+            System.out.println("\t************************************************");
+            try {
+                System.out.print("\tæ˜¯å¦ç»§ç»­è¾“å…¥ï¼Ÿ(ç»§ç»­1/ç»“æŸ0) >>");
+                flag = userInput.nextInt();
+            }
+            catch(InputMismatchException ex) {
+                System.out.println("\t>>>>>>> è¾“å…¥é”™è¯¯ï¼Œè¯·é‡æ–°è¾“å…¥ï¼ <<<<<<<");
+                System.out.print("\tæ˜¯å¦ç»§ç»­è¾“å…¥ï¼Ÿ(ç»§ç»­1/ç»“æŸ0) >>");
+                userInput.nextLine();//æ¸…ç©ºç¼“å†²åŒº
+                flag = userInput.nextInt();
+            }
+        }
+        System.out.println("\t>>>>>>>  ä¿®æ”¹æˆåŠŸ!  <<<<<<<");
+        //å°†ä¿®æ”¹åçš„æ•°æ®å†™å…¥åˆ°æ–‡ä»¶ä¸­ï¼ŒPrintWriterå®ç°è¦†ç›–
+        PrintWriter writer = new PrintWriter(file);//è¦†ç›–åŸå…ˆæ•°æ®
+        for (Person person : personArray) {
+            cover(writer, person);
+        }
+        writer.close();//å…³é—­æ–‡ä»¶å†™å…¥
+    }
+
+    public void delete(File file) throws IOException {
+        ArrayList<Person> personArray = new ArrayList<>();
+        Scanner fileInput = new Scanner(file);
+        while(fileInput.hasNextLine()) {
+            personArray.add(new Person(fileInput.nextLine(),fileInput.nextLine(),fileInput.nextLine(),
+                    fileInput.nextLine(),fileInput.nextLine(),fileInput.nextLine()));
+        }
+        fileInput.close();//å…³é—­æ–‡ä»¶è¾“å…¥
+        int flag = 1;
+        while(flag != 0){
+            for(int i = 0;i < personArray.size();i++) {
+                System.out.println("\tâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”");
+                System.out.printf("\t< %d >\n",i);
+                personArray.get(i).showPerson();
+            }
+            System.out.println("\tâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”");
+            int number = -1;
+            try {
+                System.out.print("\tè¯·è¾“å…¥è¦åˆ é™¤çš„æ•°æ®ç»„ç¼–å·(è¾“å…¥è´Ÿæ•°è¿”å›ä¸»èœå•):");
+                number = userInput.nextInt();
+            }
+            catch(InputMismatchException ex) {
+                System.out.println("\t>>>>>>> è¾“å…¥é”™è¯¯ï¼Œè¯·é‡æ–°è¾“å…¥ï¼ <<<<<<<");
+                System.out.print("\tè¯·è¾“å…¥è¦åˆ é™¤çš„æ•°æ®ç»„ç¼–å·(è¾“å…¥è´Ÿæ•°è¿”å›ä¸»èœå•):");
+                userInput.nextLine();//æ¸…ç©ºç¼“å†²åŒº
+                number = userInput.nextInt();
+            }
+            if(number < 0) {
+                System.out.println("\tè¿”å›ä¸»èœå•æˆåŠŸ,æ‚¨ä¹‹å‰æ‰€æœ‰åˆ é™¤æ“ä½œå·²è¢«å–æ¶ˆï¼");
+                return;
+            }
+            personArray.remove(number);//åˆ é™¤ç¼–å·ä¸ºnumberçš„æ•°æ®ç»„
+            try {
+                System.out.print("\tæ˜¯å¦ç»§ç»­è¾“å…¥ï¼Ÿ(ç»§ç»­1/ç»“æŸ0) >>");
+                flag = userInput.nextInt();
+            }
+            catch(InputMismatchException ex) {
+                System.out.println("\t>>>>>>> è¾“å…¥é”™è¯¯ï¼Œè¯·é‡æ–°è¾“å…¥ï¼ <<<<<<<");
+                System.out.print("\tæ˜¯å¦ç»§ç»­è¾“å…¥ï¼Ÿ(ç»§ç»­1/ç»“æŸ0) >>");
+                userInput.nextLine();//æ¸…ç©ºç¼“å†²åŒº
+                flag = userInput.nextInt();
+            }
+        }
+        System.out.println("\t>>>>>>>  åˆ é™¤æˆåŠŸ!  <<<<<<<");
+        //å°†ä¿®æ”¹åçš„æ•°æ®å†™å…¥åˆ°æ–‡ä»¶ä¸­ï¼ŒPrintWriterå®ç°è¦†ç›–
+        PrintWriter writer = new PrintWriter(file);//è¦†ç›–åŸå…ˆæ•°æ®
+        for (Person person : personArray) {
+            cover(writer, person);
+        }
+        writer.close();//å…³é—­æ–‡ä»¶å†™å…¥
+    }
+
+    public boolean isContain(Person data,String keywords) {
+        if(data.getName().contains(keywords)) return true;
+        if(data.getAddress().contains(keywords)) return true;
+        if(data.getPostalCode().contains(keywords)) return true;
+        if(data.getPhoneNumber().contains(keywords)) return true;
+        if(data.getcreationDate().contains(keywords)) return true;
+        if(data.getComment().contains(keywords)) return true;
+        return false;
+    }
+    public void search(File file) throws IOException {
+        ArrayList<Person> personArray = new ArrayList<Person>();
+        Scanner fileInput = new Scanner(file);
+        while(fileInput.hasNextLine()) {
+            personArray.add(new Person(fileInput.nextLine(),fileInput.nextLine(),fileInput.nextLine(),
+                    fileInput.nextLine(),fileInput.nextLine(),fileInput.nextLine()));
+        }
+        fileInput.close();
+        userInput.nextLine();
+        System.out.println("\tè¯·è¾“å…¥å…³é”®è¯(è¾“å…¥endè¿”å›ä¸»èœå•):");
+        System.out.print("\t>>>");
+        String keywords = userInput.nextLine();
+        if(keywords.contains("end")) {
+            System.out.println("\tè¿”å›ä¸»èœå•æˆåŠŸ!");
+            return;
+        }
+        boolean flag =  false;//åˆ¤æ–­æœç´¢æ˜¯å¦æœ‰ç»“æœ
+        for (Person person : personArray) {
             if (isContain(person, keywords)) {
-                System.out.println("\t¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª");
+                System.out.println("\tâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”");
                 person.showPerson();
-                System.out.println("\t¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª");
+                System.out.println("\tâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”");
                 flag = true;
             }
         }
-		if(flag) {
-			System.out.println("\t>>>>>>>  ²éÑ¯³É¹¦!  <<<<<<<");
-		}
-		else System.out.println("\t>>>>>>>  ËÑË÷ÎŞ½á¹û!  <<<<<<<");
-	}
-	
-	public static void main(String []args) throws InputMismatchException, IOException {
-		AddressBook addressBook = new AddressBook();//addressBook¶ÔÏó
-		File file = new File("D:\\programming\\eclipse\\Í¨ĞÅÂ¼\\data\\addressBook.txt");//ÎÄ¼ş
-		int option = 0;
-		do{
-			addressBook.menu();
-			option = userInput.nextInt();
-			System.out.println();
-			switch(option) {
-				case 0: System.out.println("\t>>>>>>> ¸ĞĞ»ÄúµÄÊ¹ÓÃ£¡ <<<<<<<"); break; 
-				case 1: {
-					addressBook.input();
-					break;
-				}
-				case 2:{
-					addressBook.show(file);
-					break;
-				}
-				case 3:{
-					addressBook.change(file);
-					break;
-				}
-				case 4:{
-					addressBook.delete(file);
-					break;
-				}
-				case 5:{
-					addressBook.search(file);
-					break;
-				}
-				default: System.out.println("\tÊäÈë´íÎó£¡");
-			}
-			//ÔöÇ¿ĞÍµÄswitch
-			/*
-			switch (option) {
-            case 0 -> System.out.println("\t>>>>>>> ¸ĞĞ»ÄúµÄÊ¹ÓÃ£¡ <<<<<<<");
-            case 1 -> {
-                addressBook.input();
+        if(flag) {
+            System.out.println("\t>>>>>>>  æŸ¥è¯¢æˆåŠŸ!  <<<<<<<");
+        }
+        else System.out.println("\t>>>>>>>  æœç´¢æ— ç»“æœ!  <<<<<<<");
+    }
+
+    public static void main(String []args) throws InputMismatchException, IOException {
+        AddressBook addressBook = new AddressBook();//addressBookå¯¹è±¡
+        File file = new File("D:\\programming\\eclipse\\AddressBook\\data\\addressBook.txt");//æ–‡ä»¶
+        int option = 0;
+        do{
+            addressBook.menu();
+            option = userInput.nextInt();
+            System.out.println();
+            switch (option) {
+                case 0:
+                    System.out.println("\t>>>>>>> æ„Ÿè°¢æ‚¨çš„ä½¿ç”¨ï¼ <<<<<<<");
+                    break;
+                case 1:
+                    addressBook.input();
+                    break;
+                case 2:
+                    addressBook.show(file);
+                    break;
+                case 3:
+                    addressBook.change(file);
+                    break;
+                case 4:
+                    addressBook.delete(file);
+                    break;
+                case 5:
+                    addressBook.search(file);
+                    break;
+                default:
+                    System.out.println("\tè¾“å…¥é”™è¯¯ï¼");
+                    break;
             }
-            case 2 -> {
-                addressBook.show(file);
-            }
-            case 3 -> {
-                addressBook.change(file);
-            }
-            case 4 -> {
-                addressBook.delete(file);
-            }
-            case 5 -> {
-                addressBook.search(file);
-            }
-            default -> System.out.println("\tÊäÈë´íÎó£¡");
-        	}
-        	*/
-		}while(option != 0);
-		userInput.close();
-	}
+        }while(option != 0);
+        userInput.close();
+    }
 }
