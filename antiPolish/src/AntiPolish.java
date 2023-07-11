@@ -34,6 +34,7 @@ public class AntiPolish {
     static Double PI = Math.PI;//圆周率π
     static Double Eu = Math.E;//自然常数e
     static ArrayList<String> mathExpression = new ArrayList<>();//数学表达式
+    static int maxDenominator = 100000;//将一个数转为分式时分母的最大取值
 
     static void Initialize(){
         /* 设置所有变量的初始值为null */
@@ -74,6 +75,96 @@ public class AntiPolish {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /* 输入变量集 */
+    static String inputVarSet(){
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("请输入变量集($开启和结束输入)：");
+        String varSet = "";
+        String input = scanner.nextLine();
+        if(!input.startsWith("$")){
+            System.out.println("格式错误，变量集的书写必须以$开头并以$结束.");
+            return null;
+        }
+        while(!input.endsWith("$")){
+            varSet = varSet.concat("\n" + input);
+            input = scanner.nextLine();
+        }
+        if(varSet.length() > 0)
+            varSet = varSet.concat("\n" + input);
+        else
+            varSet = varSet.concat(input);
+        System.out.println(varSet);
+        return varSet;
+    }
+
+    /*
+        规定变量集以$开头以$结尾
+        变量集的格式
+        $
+        a = value
+        b = value
+        ...
+        $
+        在书写变量集的时候允许任意使用空字符，变量名称必须使用变量集里面的变量名称，可以是大小写字母
+    */
+    /* 提交变量集 */
+    static void submitVar(String varSet){
+        int length = varSet.length();
+        /* 以$为开头和结尾表示该字符串为变量集 */
+        if(varSet.startsWith("$") && varSet.endsWith("$")){
+            for(int i = 1;i < length - 1;i++){
+                char ch = varSet.charAt(i);//逐字处理变量集中的字符
+                if(ch >= 'a' && ch <= 'z'){
+                    int start,end;
+                    /* 向后找到第一个=的位置 */
+                    start = varSet.indexOf("=",i);
+                    while(!(varSet.charAt(start) >= '0' && varSet.charAt(start) <= '9'))
+                        start++;
+                    end = start + 1;
+                    while((varSet.charAt(end) >= '0') && (varSet.charAt(end) <= '9') || varSet.charAt(end) == '.')
+                        end++;
+                    String sub = varSet.substring(start,end);
+                    Object value;
+                    //如果sub中有空格下面将报错
+                    if(sub.contains("."))
+                        value = Double.parseDouble(sub);
+                    else
+                        value = Integer.parseInt(sub);
+                    varSet_az_value[ch - 'a'] = value;//变量赋值
+                    i = end - 1;
+                }
+                else if(ch >= 'A' && ch <= 'Z'){
+                    int start,end;
+                    /* 向后找到第一个=的位置 */
+                    start = varSet.indexOf("=",i);
+                    while(!(varSet.charAt(start) >= '0' && varSet.charAt(start) <= '9'))
+                        start++;
+                    end = start + 1;
+                    while((varSet.charAt(end) >= '0') && (varSet.charAt(end) <= '9') || varSet.charAt(end) == '.')
+                        end++;
+                    String sub = varSet.substring(start,end);
+                    Object value;
+                    //如果sub中有空格下面将报错
+                    if(sub.contains("."))
+                        value = Double.parseDouble(sub);
+                    else
+                        value = Integer.parseInt(sub);
+                    varSet_AZ_value[ch - 'A'] = value;//变量赋值
+                    i = end - 1;
+                }
+                else if(ch == ' ' || ch == '\n' || ch == '\t'){
+                }
+                else {
+                    System.out.println(varSet);
+                    System.out.printf("在上面提交的变量集中%c不属于规定的变量名称，变量名称只能是大小写字母!",ch);
+                    return;
+                }
+            }
+        }
+        else
+            System.out.printf("变量集{%s}格式错误!",varSet);
     }
 
     /* 读取指定文件的变量集 */
@@ -233,77 +324,6 @@ public class AntiPolish {
         logging("保存的变量集：\n" + varSetToString());
     }
 
-    /* 将当前变量集转为字符串 */
-    static String varSetToString(){
-        String varSet = "$\n";
-        for(int i = 0;i < 26;i++){
-            if(varSet_az_value[i] != null){
-                varSet = varSet.concat((char)('a' + i ) + " = " + varSet_az_value[i] + "\n");
-            }
-        }
-        for(int i = 0;i < 26;i++){
-            if(varSet_AZ_value[i] != null){
-                varSet = varSet.concat((char)('A' + i ) + " = " + varSet_AZ_value[i] + "\n");
-            }
-        }
-        varSet = varSet.concat("$\n");
-        return varSet;
-    }
-
-    /* 获取运算符的优先级，返回值越大优先级越大 */
-    static int getLevel(String ch){
-        if(ch.equals("+") || ch.equals("-"))  return 1;
-        else if(ch.equals("*") || ch.equals("/") || ch.equals("%")) return 2;
-        else if(ch.equals("^")) return 3;
-        else if(ch.equals("(") || ch.equals("）")) return 4;
-        else return 5;
-    }
-
-    static boolean isFunction(String str){
-        String[] functions = {
-                "sin","cos","tan","arcsin","arccos","arctan",
-                "lg","ln","sh","ch","th",
-        };
-        int length = functions.length;
-        for(int i = 0;i < length;i++)
-            if(functions[i].equals(str)) return true;
-        return false;
-    }//优先级为2
-
-    /* 判断一个字符串是否为计算表达式 */
-    static boolean isExpression(String command){
-        /* command在输入后就自动转换成小写形式了 */
-        command = command.replaceAll(" ","");
-        command = command.replaceAll("PI","").replaceAll("Eu","");
-        command = command.replaceAll("\\d","");//移除command中的所有数字
-        command = command.toLowerCase();//将command转换的字母全部转为小写
-        String[] tokens = command.split("[+\\-*/%^!！()（）\\[\\]]");//以+-*/%^!！()（）[]这些符号分割字符串
-        for(String token:tokens){
-            if(token.isEmpty()) continue;
-            //如果token全部由小写字母组成
-            if(token.matches("[a-z]+")) {//判断是否由大小写字母组成：match("[a-zA-Z]+")
-                if (!isFunction(token)) {
-                    System.out.println(token + "不属于函数运算符！");
-                    return false;
-                }
-            }
-            else {
-                System.out.println("无法识别\"" + token + "\"");
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /* 判断一个字符是否是运算符 */
-    static boolean isOperator(char ch){
-        char[] operators = {
-                '+','-','*','/','%','^','!', '！'
-        };
-        for (char operator : operators) if (ch == operator) return true;
-        return false;
-    }
-
     /* 显示所有变量及其赋值 */
     static void showAllVars(){
         boolean flag = false;
@@ -328,6 +348,221 @@ public class AntiPolish {
         }
     }
 
+    /* 将当前变量集转为字符串 */
+    static String varSetToString(){
+        String varSet = "$\n";
+        for(int i = 0;i < 26;i++){
+            if(varSet_az_value[i] != null){
+                varSet = varSet.concat((char)('a' + i ) + " = " + varSet_az_value[i] + "\n");
+            }
+        }
+        for(int i = 0;i < 26;i++){
+            if(varSet_AZ_value[i] != null){
+                varSet = varSet.concat((char)('A' + i ) + " = " + varSet_AZ_value[i] + "\n");
+            }
+        }
+        varSet = varSet.concat("$\n");
+        return varSet;
+    }
+
+    /* 获取运算符的优先级，返回值越大优先级越大 */
+    static int getLevel(String ch){
+        if(ch.equals("+") || ch.equals("-"))  return 1;
+        else if(ch.equals("*") || ch.equals("/") || ch.equals("%")) return 2;
+        else if(ch.equals("^")) return 3;
+        else if(ch.equals("!") || ch.equals("！")) return 4;
+        else if(ch.equals("(") || ch.equals(")") || ch.equals("（") || ch.equals("）")
+                || ch.equals("[") || ch.equals("]")) return 5;
+        else return 5;
+    }
+
+    static boolean antiPolishTest(String expression){
+        Stack stack = new Stack();
+        int length = expression.length();
+        for(int i = 0;i < length;i++){
+            char ch = expression.charAt(i);
+            if(ch == ' ' || ch == '\t') {
+            }
+
+            /* 常量PI = Math.PI */
+            else if(ch == 'P' && expression.charAt(i + 1) == 'I'){
+                i++;
+            }
+
+            /* 常量e为欧拉数(Euler number),e = Math.E */
+            else if(ch == 'E' && expression.charAt(i + 1) == 'u'){
+                i++;
+            }
+
+            /* 除PI和Eu外，连续出现两个字母判定为函数 */
+            else if(Character.isLetter(ch) && i + 1 < length && Character.isLetter(expression.charAt(i + 1))){
+                int flag = 0;
+                String func1 = null,func2 = null,func3 = null,func5 = null;
+                /* 所有函数都以小写处理 */
+                if(i + 6 <= length) func5 = expression.substring(i,i + 6).toLowerCase();//arcsin、arccos、arctan
+                if(i + 4 <= length) func3 = expression.substring(i,i + 4).toLowerCase();//arsh、arch、arth、pify、frac
+                if(i + 3 <= length) func2 = expression.substring(i,i + 3).toLowerCase();//sin、cos、tan、abs、exp
+                if(i + 2 <= length) func1 = expression.substring(i,i + 2).toLowerCase();//lg、ln、sh、ch、th
+                if(func1 != null && (func1.equals("lg") || func1.equals("ln") || func1.equals("sh") || func1.equals("ch") || func1.equals("th")))
+                    flag = 1;
+                if(func2 != null && (func2.equals("sin") || func2.equals("cos") || func2.equals("tan"))
+                        || func2.equals("abs") || func2.equals("exp"))
+                    flag = 2;
+                if(func3 != null && (func3.equals("arsh") || func3.equals("arch") || func3.equals("arth")
+                        || func3.equals("pify") || func3.equals("frac")))
+                    flag = 3;
+                if(func5 != null && (func5.equals("arcsin") || func5.equals("arccos") || func5.equals("arctan")))
+                    flag = 5;
+                if(flag != 0) {
+                    /* 如果栈不为空 */
+                    if (stack.size() != 0) {
+                        String top = stack.peek().toString();
+                        int level1 = 4;//扫描到的函数,默认函数的优先级为4
+                        int level2 = getLevel(top);//栈顶的符号
+                        /* 将优先级低于栈顶符号的符号入栈 */
+                        if (level1 > level2 || top.equals("(") || top.equals("（") || top.equals("[")){}
+                        else {//把优先级大于等于当前级别的符号全部出栈
+                            while (level1 <= level2 && !top.equals("(") && !top.equals("（") && !top.equals("[")) {
+                                if (stack.isEmpty()) break;
+                                if(stack.peek() instanceof String)
+                                    level2 = 4;
+                                else
+                                    level2 = getLevel(stack.peek().toString());
+                                top = stack.peek().toString();
+                            }
+                        }
+                    }
+                    i += flag;//索引移到函数最后一个字符
+                    /* 入栈，如果栈空直接入栈 */
+                    switch (flag){
+                        case 5: stack.push(func5); break;
+                        case 3: stack.push(func3); break;
+                        case 2: stack.push(func2); break;
+                        case 1: stack.push(func1); break;
+                    }
+                }
+                else
+                    return false;
+            }
+
+            /* 如果是变量 */
+            else if((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')){
+            }
+
+            /* 如果是数字 */
+            else if(ch >= '0' && ch <= '9'){
+                int j = i;
+                char num;
+                do{
+                    j++;
+                    if(j >= length) break;
+                    num = expression.charAt(j);
+                }while(num >= '0' && num <= '9' || num == '.');
+                i = j - 1;//将下一个扫描的位置移到数字后一个字符
+            }
+
+            /* 如果是运算符 */
+            else if(isOperator(ch)){
+                if(stack.isEmpty()) stack.push(ch);//栈为空
+                else if(ch == ')' || ch == '）') {
+                    /* 一直出栈直到遇到'(' */
+                    String top = stack.peek().toString();
+                    while(!top.equals("(") && !top.equals("（")) {
+                        top = stack.peek().toString();
+                    }
+                    stack.pop();//pop掉(或（
+                }//中英文括号可以混合使用
+                else if(ch == ']') {
+                    /* 一直出栈直到遇到'[' */
+                    while(!stack.peek().toString().equals("[")){
+                    }
+                    stack.pop();//pop掉[
+                }//方括号[]与()的作用相同
+                else {
+                    String top = stack.peek().toString();//栈顶的符号
+                    int level1 = getLevel(Character.toString(ch));//扫描到的符号
+                    int level2;//栈顶符号的优先级
+                    if(stack.peek() instanceof String)
+                        level2 = 4;//函数的优先级
+                    else
+                        level2 = getLevel(top);
+                    //System.out.println("level1:" + level1 + " " + "level2：" + level2 + " ch:" + ch);
+                    /* 将优先级低于栈顶符号的符号入栈 */
+                    if (level1 > level2 || top.equals("(") || top.equals("（") || top.equals("[")) {
+                        stack.push(ch);
+                    }
+                    else{//把优先级大于等于当前级别的符号全部出栈
+                        while (level1 <= level2 && !top.equals("(") && !top.equals("（") && !top.equals("[")) {
+                            if (stack.isEmpty()) break;
+                            if(stack.peek() instanceof String)
+                                level2 = 4;//函数的优先级
+                            else
+                                level2 = getLevel(stack.peek().toString());
+                            top = stack.peek().toString();
+                        }
+                        stack.push(ch);//将当前扫描的符号入栈
+                    }
+                }
+            }
+
+            /* 未知字符 */
+            else
+                return false;
+        }//遍历计算表达式
+
+        /* 将栈中剩余符号pop */
+        while(!stack.isEmpty())
+           stack.pop();
+       return true;
+    }
+
+    static boolean isFunction(String str){
+        String[] functions = {
+                "sin","cos","tan","abs","exp",
+                "arsh","arch","arth","pify","frac",
+                "arcsin","arccos","arctan",
+                "lg","ln","sh","ch","th",
+        };
+        int length = functions.length;
+        for(int i = 0;i < length;i++)
+            if(functions[i].equals(str)) return true;
+        return false;
+    }//优先级为4
+
+    /* 判断一个字符串是否为计算表达式 */
+    static boolean isExpression(String command){
+        command = command.replace(" ","");
+        command = command.replace("PI","").replace("Eu","");
+        command = command.replaceAll("\\d","");//移除command中的所有数字
+        command = command.replace(".","");//移除小数点
+        command = command.toLowerCase();//将command转换的字母全部转为小写
+        String[] tokens = command.split("[+\\-*/%^!！()（）\\[\\]]");//以+-*/%^!！()（）[]这些符号分割字符串
+        for(String token:tokens){
+            if(token.isEmpty()) continue;
+            //如果token全部由小写字母组成
+            if(token.matches("[a-z]+")) {//判断是否由大小写字母组成：match("[a-zA-Z]+")
+                if (!isFunction(token)) {
+                    System.out.println(token + "不属于函数运算符！");
+                    return false;
+                }
+            }
+            else {
+                System.out.println("无法识别\"" + token + "\"");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /* 判断一个字符是否是运算符 */
+    static boolean isOperator(char ch){
+        char[] operators = {
+                '+','-','*','/','%','^','!', '！','(',')','（','）','[',']'
+        };
+        for (char operator : operators) if (ch == operator) return true;
+        return false;
+    }
+
     /* 将list转String */
     static String listToString(List<Object> list){
         if(list.size() == 0) return null;
@@ -338,28 +573,185 @@ public class AntiPolish {
         return sub.replaceAll("\\s","").replaceAll(","," ");
     }
 
-    /* 计算阶乘 */
+    /*  计算阶乘,n! = 1*2*3*...*n  */
     static int fact(Object obj){
         int n = 1;
         int res = 1;
-        if(obj instanceof Double) {
+        if(obj instanceof Double)
             n = (int) Math.round((double) obj);
-        } else if(obj instanceof String) {
-            n = Integer.parseInt((String) obj);
-        } else if(obj instanceof Integer) {
+        else if(obj instanceof Integer)
             n = (int) obj;
-        }
+        else if(obj instanceof String)
+            n = Integer.parseInt((String) obj);
         for(int i = 1; i <= n; i++){
              res *= i;
         }
         return res;
     }
 
-    /* 将一个数转为带π的式子 */
-    static String toPIFraction(Object obj){
+    /* sin，三角正弦函数 */
+    static double sin(Object obj){
+        double x = 0;
+        if(obj instanceof Double)
+            x = (Double)obj;
+        else if(obj instanceof Integer)
+            x = (Integer)obj;
+        else if(obj instanceof String)
+            x = Double.parseDouble((String) obj);
+        return Math.sin(x);
+    }
+
+    /* cos，三角余弦函数 */
+    static double cos(Object obj){
+        double x = 0;
+        if(obj instanceof Double)
+            x = (Double)obj;
+        else if(obj instanceof Integer)
+            x = (Integer)obj;
+        else if(obj instanceof String)
+            x = Double.parseDouble((String) obj);
+        return Math.cos(x);
+    }
+
+    /* tan，三角正切函数 */
+    static double tan(Object obj){
+        double x = 0;
+        if(obj instanceof Double)
+            x = (Double)obj;
+        else if(obj instanceof Integer)
+            x = (Integer)obj;
+        else if(obj instanceof String)
+            x = Double.parseDouble((String) obj);
+        return Math.tan(x);
+    }
+
+    /* abs,取绝对值 */
+    static double abs(Object obj){
+        double x = 0;
+        if(obj instanceof Double)
+            x = (Double)obj;
+        else if(obj instanceof Integer)
+            x = (Integer)obj;
+        else if(obj instanceof String)
+            x = Double.parseDouble((String) obj);
+        return Math.abs(x);
+    }
+
+    /*  exp,计算e的x次方，exp(x) = e ^ x  */
+    static double exp(Object obj){
+        double x = 0;
+        if(obj instanceof Double)
+            x = (Double)obj;
+        else if(obj instanceof Integer)
+            x = (Integer)obj;
+        else if(obj instanceof String)
+            x = Double.parseDouble((String) obj);
+        return Math.exp(x);
+    }//exp
+
+    /*  sh,计算双曲正弦,sh x = (e^x - 1/e^x) / 2  */
+    static double sh(Object obj){
+        double x = 0;
+        if(obj instanceof Double)
+            x = (Double)obj;
+        else if(obj instanceof Integer)
+            x = (Integer)obj;
+        else if(obj instanceof String)
+            x = Double.parseDouble((String) obj);
+        return Math.sinh(x);//sh x = (e^x - 1/e^x) / 2
+    }//sh
+
+    /*  ch，计算双曲余弦,ch x = (e^x + 1/e^x) / 2  */
+    static double ch(Object obj){
+        double x = 0;
+        if(obj instanceof Double)
+            x = (Double)obj;
+        else if(obj instanceof Integer)
+            x = (Integer)obj;
+        else if(obj instanceof String)
+            x = Double.parseDouble((String) obj);
+        return Math.cosh(x);//ch x = (e^x + 1/e^x) / 2
+    }//ch
+
+    /*  th,计算双曲正切，th = sh / ch = (e^x - 1/e^x)/(e^x + 1/e^x)  */
+    static double th(Object obj){
+        double x = 0;
+        if(obj instanceof Double)
+            x = (Double)obj;
+        else if(obj instanceof Integer)
+            x = (Integer)obj;
+        else if(obj instanceof String)
+            x = Double.parseDouble((String) obj);
+        return Math.tanh(x);//th = sh / ch = (e^x - 1/e^x)/(e^x + 1/e^x)
+    }//th
+
+    /*  log10，计算以10为底的对数  */
+    static double lg(Object obj){
+        double x = 0;
+        if(obj instanceof Double)
+            x = (Double)obj;
+        else if(obj instanceof Integer)
+            x = (Integer)obj;
+        else if(obj instanceof String)
+            x = Double.parseDouble((String) obj);
+        return Math.log10(x);
+    }//lg
+
+    /*  ln，计算以自然常数e为底的对数  */
+    static double ln(Object obj){
+        double x = 0;
+        if(obj instanceof Double)
+            x = (Double)obj;
+        else if(obj instanceof Integer)
+            x = (Integer)obj;
+        else if(obj instanceof String)
+            x = Double.parseDouble((String) obj);
+        return Math.log(x);
+    }//ln
+
+    /*  arcsin,反三角正弦函数  */
+    static double arcsin(Object obj){
+        double x = 0;
+        if(obj instanceof Double)
+            x = (Double)obj;
+        else if(obj instanceof Integer)
+            x = (Integer)obj;
+        else if(obj instanceof String)
+            x = Double.parseDouble((String) obj);
+        return Math.asin(x);
+    }//arcsin
+
+
+    /*  arccos,反三角余弦函数  */
+    static double arccos(Object obj){
+        double x = 0;
+        if(obj instanceof Double)
+            x = (Double)obj;
+        else if(obj instanceof Integer)
+            x = (Integer)obj;
+        else if(obj instanceof String)
+            x = Double.parseDouble((String) obj);
+        return Math.asin(x);
+    }//arccos
+
+    /*  arctan,反三角正切函数  */
+    static double arctan(Object obj){
+        double x = 0;
+        if(obj instanceof Double)
+            x = (Double)obj;
+        else if(obj instanceof Integer)
+            x = (Integer)obj;
+        else if(obj instanceof String)
+            x = Double.parseDouble((String) obj);
+        return Math.atan(x);
+    }//arctan
+
+    /* 将一个数转为以π为因子的式子 */
+    static String pify(Object obj){
         boolean ifPositive = true;//是否是正数
         double num = 0;//传入的参数的值
         double coef;//转换成带π的式子中π的系数
+
         if(obj instanceof Integer){
             num = (int)((Integer)obj);
         }
@@ -369,16 +761,18 @@ public class AntiPolish {
         else if(obj instanceof String){
             num = Double.parseDouble((String) obj);
         }
+
         if(num == 0) return "0";//如果num为0，返回空字符串
         if(num < 0) {
             num = -num;//取绝对值
             ifPositive = false;//判断正负
         }
+
         coef = num / PI;
         int integerPart = (int)Math.floor(coef);//向下取整，整数部分
         double fractionalPart = coef - integerPart;//小数部分
         FractionConverter converter = new FractionConverter();
-        int maxDenominator = 1000;//分母的最大值
+
         //正数
         if(ifPositive) {
             if (fractionalPart != 0) {
@@ -388,8 +782,9 @@ public class AntiPolish {
                     return "(" + converter.simplifyFraction(fractionalPart, maxDenominator) + ")π";
             }
             else
-                return integerPart + "π";
+                return (integerPart != 1 ? integerPart : "") + "π";
         }
+
         //负数
         else {
             if (fractionalPart != 0)
@@ -398,77 +793,76 @@ public class AntiPolish {
                 else
                     return "-(" + converter.simplifyFraction(fractionalPart,maxDenominator) + ")π";
             else
-                return "-" + integerPart + "π";
+                return "-" + (integerPart != 1 ? integerPart : "") + "π";
         }
     }
 
-    /*
-        规定变量集以$开头以$结尾
-        变量集的格式
-        $
-        a = value
-        b = value
-        ...
-        $
-        在书写变量集的时候允许任意使用空字符，变量名称必须使用变量集里面的变量名称，可以是大小写字母
-    */
-    /* 提交变量集 */
-    static void submitVar(String varSet){
-        int length = varSet.length();
-        /* 以$为开头和结尾表示该字符串为变量集 */
-        if(varSet.startsWith("$") && varSet.endsWith("$")){
-            for(int i = 1;i < length - 1;i++){
-               char ch = varSet.charAt(i);//逐字处理变量集中的字符
-               if(ch >= 'a' && ch <= 'z'){
-                   int start,end;
-                   /* 向后找到第一个=的位置 */
-                   start = varSet.indexOf("=",i);
-                   while(!(varSet.charAt(start) >= '0' && varSet.charAt(start) <= '9'))
-                       start++;
-                   end = start + 1;
-                   while((varSet.charAt(end) >= '0') && (varSet.charAt(end) <= '9') || varSet.charAt(end) == '.')
-                       end++;
-                   String sub = varSet.substring(start,end);
-                   Object value;
-                   //如果sub中有空格下面将报错
-                   if(sub.contains("."))
-                       value = Double.parseDouble(sub);
-                   else
-                       value = Integer.parseInt(sub);
-                   varSet_az_value[ch - 'a'] = value;//变量赋值
-                   i = end - 1;
-               }
-               else if(ch >= 'A' && ch <= 'Z'){
-                   int start,end;
-                   /* 向后找到第一个=的位置 */
-                   start = varSet.indexOf("=",i);
-                   while(!(varSet.charAt(start) >= '0' && varSet.charAt(start) <= '9'))
-                       start++;
-                   end = start + 1;
-                   while((varSet.charAt(end) >= '0') && (varSet.charAt(end) <= '9') || varSet.charAt(end) == '.')
-                       end++;
-                   String sub = varSet.substring(start,end);
-                   Object value;
-                   //如果sub中有空格下面将报错
-                   if(sub.contains("."))
-                       value = Double.parseDouble(sub);
-                   else
-                       value = Integer.parseInt(sub);
-                   varSet_AZ_value[ch - 'A'] = value;//变量赋值
-                   i = end - 1;
-               }
-               else if(ch == ' ' || ch == '\n' || ch == '\t'){
-               }
-               else {
-                   System.out.println(varSet);
-                   System.out.printf("在上面提交的变量集中%c不属于规定的变量名称，变量名称只能是大小写字母!",ch);
-                   return;
-               }
+    /* frac,将一个数转换成分式 */
+    static String frac(Object obj,int maxDenominator){
+        double num = 0;
+        if(obj instanceof Integer)
+            num = (Integer)obj;
+        else if(obj instanceof Double)
+            num = (Double)obj;
+        else if(obj instanceof String)
+            num = Double.parseDouble((String) obj);
+
+        double EPSILON = 1e-15; // 定义一个极小值作为误差限制
+
+        double error = Math.abs(num); // 初始化误差
+        int bestNumerator = 0; // 存储最佳近似的分子
+        int bestDenominator = 1; // 存储最佳近似的分母
+
+        for (int i = 1; i <= maxDenominator; i++) {
+            int currentNumerator = (int) Math.round(num * i); // 计算当前分子
+            double currentError = Math.abs(num - (double) currentNumerator / i); // 计算当前误差
+
+            if (currentError < error - EPSILON) {
+                // 如果当前误差小于之前的误差，更新最佳近似的分子、分母和误差
+                error = currentError;
+                bestNumerator = currentNumerator;
+                bestDenominator = i;
             }
         }
-        else
-            System.out.printf("变量集{%s}格式错误!",varSet);
-    }
+
+        return bestNumerator + "/" + bestDenominator;//返回转换得到的分式
+    }//frac
+
+    /*  arsh,反双曲正弦函数  */
+    static double arsh(Object obj){
+        double x = 0;
+        if(obj instanceof Double)
+            x = (Double)obj;
+        else if(obj instanceof Integer)
+            x = (Integer)obj;
+        else if(obj instanceof String)
+            x = Double.parseDouble((String) obj);
+        return ln(x + Math.sqrt(x * x + 1));//arsh = ln(x + sqrt(x ^ 2 + 1));
+    }//arsh
+
+    /*  arch,反双曲余弦函数  */
+    static double arch(Object obj){
+        double x = 0;
+        if(obj instanceof Double)
+            x = (Double)obj;
+        else if(obj instanceof Integer)
+            x = (Integer)obj;
+        else if(obj instanceof String)
+            x = Double.parseDouble((String) obj);
+        return ln(x + Math.sqrt(x * x - 1));//arsh = ln(x + sqrt(x ^ 2 - 1));
+    }//arch
+
+    /*  arth,反三角正切函数  */
+    static double arth(Object obj){
+        double x = 0;
+        if(obj instanceof Double)
+            x = (Double)obj;
+        else if(obj instanceof Integer)
+            x = (Integer)obj;
+        else if(obj instanceof String)
+            x = Double.parseDouble((String) obj);
+        return 0.5 * ln((1 + x) / (1 - x));//arth = ln[(1+x)/(1-x)] / 2
+    }//arth
 
     /*
         计算表达式转逆波兰表达式的测试
@@ -501,7 +895,7 @@ public class AntiPolish {
 
          [ln(
      */
-    static List antiPolish(String expression){
+    static List antiPolish(String expression) throws Exception{
         Stack stack = new Stack();
         ArrayList<Object> postfixNotation = new ArrayList<>();
         int length = expression.length();
@@ -528,14 +922,16 @@ public class AntiPolish {
                 String func1 = null,func2 = null,func3 = null,func5 = null;
                 /* 所有函数都以小写处理 */
                 if(i + 6 <= length) func5 = expression.substring(i,i + 6).toLowerCase();//arcsin、arccos、arctan
-                if(i + 4 <= length) func3 = expression.substring(i,i + 4).toLowerCase();//arsh、arch、arth
-                if(i + 3 <= length) func2 = expression.substring(i,i + 3).toLowerCase();//sin、cos、tan
+                if(i + 4 <= length) func3 = expression.substring(i,i + 4).toLowerCase();//arsh、arch、arth、pify、frac
+                if(i + 3 <= length) func2 = expression.substring(i,i + 3).toLowerCase();//sin、cos、tan、abs、exp
                 if(i + 2 <= length) func1 = expression.substring(i,i + 2).toLowerCase();//lg、ln、sh、ch、th
                 if(func1 != null && (func1.equals("lg") || func1.equals("ln") || func1.equals("sh") || func1.equals("ch") || func1.equals("th")))
                     flag = 1;
-                if(func2 != null && (func2.equals("sin") || func2.equals("cos") || func2.equals("tan")))
+                if(func2 != null && (func2.equals("sin") || func2.equals("cos") || func2.equals("tan"))
+                        || func2.equals("abs") || func2.equals("exp"))
                     flag = 2;
-                if(func3 != null && (func3.equals("arsh") || func3.equals("arch") || func3.equals("arth")))
+                if(func3 != null && (func3.equals("arsh") || func3.equals("arch") || func3.equals("arth")
+                        || func3.equals("pify") || func3.equals("frac")))
                     flag = 3;
                 if(func5 != null && (func5.equals("arcsin") || func5.equals("arccos") || func5.equals("arctan")))
                     flag = 5;
@@ -543,7 +939,7 @@ public class AntiPolish {
                     /* 如果栈不为空 */
                     if (stack.size() != 0) {
                         String top = stack.peek().toString();
-                        int level1 = 2;//扫描到的函数,默认函数的优先级为2
+                        int level1 = 4;//扫描到的函数,默认函数的优先级为4
                         int level2 = getLevel(top);//栈顶的符号
                         /* 将优先级低于栈顶符号的符号入栈 */
                         if (level1 > level2 || top.equals("(") || top.equals("（") || top.equals("[")){}
@@ -552,7 +948,7 @@ public class AntiPolish {
                                 postfixNotation.add(stack.pop());
                                 if (stack.isEmpty()) break;
                                 if(stack.peek() instanceof String)
-                                    level2 = 2;
+                                    level2 = 4;
                                 else
                                     level2 = getLevel(stack.peek().toString());
                                 top = stack.peek().toString();
@@ -617,20 +1013,20 @@ public class AntiPolish {
                         postfixNotation.add(stack.pop());
                         top = stack.peek().toString();
                     }
-                    stack.pop();
+                    stack.pop();//pop掉(或（
                 }//中英文括号可以混合使用
                 else if(ch == ']') {
                     /* 一直出栈直到遇到'[' */
                     while(!stack.peek().toString().equals("["))
                         postfixNotation.add(stack.pop());
-                    stack.pop();
+                    stack.pop();//pop掉[
                 }//方括号[]与()的作用相同
                 else {
                     String top = stack.peek().toString();//栈顶的符号
                     int level1 = getLevel(Character.toString(ch));//扫描到的符号
                     int level2;//栈顶符号的优先级
                     if(stack.peek() instanceof String)
-                        level2 = 2;
+                        level2 = 4;//函数的优先级
                     else
                         level2 = getLevel(top);
                     //System.out.println("level1:" + level1 + " " + "level2：" + level2 + " ch:" + ch);
@@ -643,7 +1039,7 @@ public class AntiPolish {
                             postfixNotation.add(stack.pop());
                             if (stack.isEmpty()) break;
                             if(stack.peek() instanceof String)
-                                level2 = 2;
+                                level2 = 4;//函数的优先级
                             else
                                 level2 = getLevel(stack.peek().toString());
                             top = stack.peek().toString();
@@ -657,7 +1053,7 @@ public class AntiPolish {
                 System.out.println("stack:" + stack);
                 System.out.println("antipolish:" + listToString(postfixNotation));
              */
-        }
+        }//遍历计算表达式
 
         /* 将栈中剩余符号pop */
         while(!stack.isEmpty()) {
@@ -709,20 +1105,22 @@ public class AntiPolish {
                             /* 获取计算值和函数的参数对象 */
                             Object value = list.pop();//获取计算值
                             Object var = varTrack.pop();//追踪
-                            if(Math.abs(Math.sin(value instanceof Double ? (Double)value : (Integer)value)) > 1e-15) {
-                                list.push(Math.sin((Double) value));//push计算结果
-                                varTrack.push(Math.sin((Double) value));//跟踪
+                            /* 如果计算结果无限接近于某个整数，进行取整值 */
+                            if(Math.abs( sin(value) - Math.round(sin(value)) )< 1e-15 ){
+                                double value_round = Math.round(sin(value));
+                                list.push(value_round);
+                                varTrack.add(value_round);
                             }
-                            //如果计算结果过小，将结果记作0
                             else {
-                                list.push(0.0);//push计算结果
-                                varTrack.push(0.0);//跟踪
+                                list.push(sin(value));//push计算结果
+                                varTrack.push(sin(value));//跟踪
                             }
 
+                            String value_PI = pify(value);//以π为因子的值
                             /* 输出计算过程 */
                             if (var instanceof Character) {
-                                System.out.println("sin" + var + " = " + list.peek() + "   " + var + " = " + value);
-                                logging("sin" + var + " = " + list.peek() + "   " + var + " = " + value);
+                                System.out.println("sin" + var + " = " + list.peek() + "   " + var + "=" + value + "   " + var + "=" + value_PI);
+                                logging("sin" + var + " = " + list.peek() + "   " + var + "=" + value + "   " + var + "=" + value+PI);
                             }//参数为变量的处理
                             else if (var instanceof String) {
                                 if (var.equals("PI")) {
@@ -730,8 +1128,8 @@ public class AntiPolish {
                                     logging("sin π" + " = " + list.peek() + "   π = " + PI);
                                 }
                                 else if (var.equals("Eu")) {
-                                    System.out.println("sin e" + " = " + list.peek() + "   e = " + toPIFraction(Eu));
-                                    logging("sin e" + " = " + list.peek() + "   e = " + toPIFraction(Eu));
+                                    System.out.println("sin e" + " = " + list.peek() + "   e = " + pify(Eu));
+                                    logging("sin e" + " = " + list.peek() + "   e = " + pify(Eu));
                                 }
                                 else {
                                     System.out.println("出现无法识别的符号：" + var);
@@ -740,30 +1138,32 @@ public class AntiPolish {
                                 }
                             }//参数为π和e的处理
                             else {
-                                System.out.println("sin (" + toPIFraction(value) + ") = " + list.peek());
-                                logging("sin (" + toPIFraction(value) + ") = " + list.peek());
+                                System.out.println("sin (" + value_PI + ") = " + list.peek() + "   " + value_PI + " = " + value);
+                                logging("sin (" + value_PI + ") = " + list.peek() + "   " + value_PI + " = " + value);
                             }//参数为double或int数值类型的处理
                         }//sin
 
                         /* cos */
-                        if (obj.equals("cos")) {
+                        else if (obj.equals("cos")) {
                             /* 获取计算值和函数的参数对象 */
                             Object value = list.pop();//获取计算值
                             Object var = varTrack.pop();//追踪
-                            if(Math.abs(Math.cos(value instanceof Double ? (Double)value : (Integer)value)) > 1e-15) {
-                                list.push(Math.cos((Double) value));//push计算结果
-                                varTrack.push(Math.cos((Double) value));//跟踪
+                            /* 如果计算结果无限接近于某个整数，进行取整值 */
+                            if(Math.abs( cos(value) - Math.round(cos(value)) ) < 1e-15 ){
+                                double value_round = Math.round(cos(value));
+                                list.push(value_round);
+                                varTrack.add(value_round);
                             }
-                            //如果计算结果过小，将结果记作0
                             else {
-                                list.push(0.0);//push计算结果
-                                varTrack.push(0.0);//跟踪
+                                list.push(cos(value));//push计算结果
+                                varTrack.push(cos(value));//跟踪
                             }
 
+                            String value_PI = pify(value);//以π为因子的值
                             /* 输出计算过程 */
                             if (var instanceof Character) {
-                                System.out.println("cos" + var + " = " + list.peek() + "   " + var + " = " + value);
-                                logging("cos" + var + " = " + list.peek() + "   " + var + " = " + value);
+                                System.out.println("cos" + var + " = " + list.peek() + "   " + var + " = " + value + "   " + var + "=" + value+PI);
+                                logging("cos" + var + " = " + list.peek() + "   " + var + " = " + value + "   " + var + "=" + value+PI);
                             }//参数为变量的处理
                             else if (var instanceof String) {
                                 if (var.equals("PI")) {
@@ -771,8 +1171,8 @@ public class AntiPolish {
                                     logging("cos π" + " = " + list.peek() + "   π = " + PI);
                                 }
                                 else if (var.equals("Eu")) {
-                                    System.out.println("cos e" + " = " + list.peek() + "   e = " + toPIFraction(Eu));
-                                    logging("cos e" + " = " + list.peek() + "   e = " + toPIFraction(Eu));
+                                    System.out.println("cos e" + " = " + list.peek() + "   e = " + pify(Eu));
+                                    logging("cos e" + " = " + list.peek() + "   e = " + pify(Eu));
                                 }
                                 else {
                                     System.out.println("出现无法识别的符号：" + var);
@@ -781,11 +1181,663 @@ public class AntiPolish {
                                 }
                             }//参数为π和e的处理
                             else {
-                                System.out.println("cos (" + toPIFraction(value) + ") = " + list.peek());
-                                logging("cos (" + toPIFraction(value) + ") = " + list.peek());
+                                System.out.println("cos (" + value_PI + ") = " + list.peek() + "   " + value_PI + " = " + value);
+                                logging("cos (" + value_PI + ") = " + list.peek() + "   " + value_PI + " = " + value);
                             }//参数为double或int数值类型的处理
                         }//cos
 
+                        /* tan */
+                        else if (obj.equals("tan")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+
+                            /* 如果计算结果无限接近于某个整数，进行取整值 */
+                            if(Math.abs( tan(value) - Math.round(tan(value)) ) < 1e-15 ){
+                                double value_round = Math.round(tan(value));
+                                list.push(value_round);
+                                varTrack.add(value_round);
+                            }
+                            else {
+                                list.push(tan(value));//push计算结果
+                                varTrack.push(tan(value));//跟踪
+                            }
+
+                            String value_PI = pify(value);//以π为因子的值
+                            /* 输出计算过程 */
+                            if (var instanceof Character) {
+                                System.out.println("tan" + var + " = " + list.peek() + "   " + var + " = " + value);
+                                logging("tan" + var + " = " + list.peek() + "   " + var + " = " + value);
+                            }//参数为变量的处理
+                            else if (var instanceof String) {
+                                if (var.equals("PI")) {
+                                    System.out.println("tan π" + " = " + list.peek() + "   π = " + PI);
+                                    logging("tan π" + " = " + list.peek() + "   π = " + PI);
+                                }
+                                else if (var.equals("Eu")) {
+                                    System.out.println("tan e" + " = " + list.peek() + "   e = " + pify(Eu));
+                                    logging("tan e" + " = " + list.peek() + "   e = " + pify(Eu));
+                                }
+                                else {
+                                    System.out.println("出现无法识别的符号：" + var);
+                                    logging("出现无法识别的符号：" + var);
+                                    return null;
+                                }
+                            }//参数为π和e的处理
+                            else {
+                                System.out.println("tan (" + value_PI + ") = " + list.peek() + "   " + value_PI + " = " + value);
+                                logging("tan (" + value_PI + ") = " + list.peek() + "   " + value_PI + " = " + value);
+                            }//参数为double或int数值类型的处理
+                        }//tan
+
+                        /* abs */
+                        else if (obj.equals("abs")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+
+                            /* 如果计算结果无限接近于某个整数，进行取整值 */
+                            if(Math.abs( abs(value) - Math.round(abs(value)) ) < 1e-15 ){
+                                double value_round = Math.round(abs(value));
+                                list.push(value_round);
+                                varTrack.add(value_round);
+                            }
+                            else {
+                                list.push(abs(value));//push计算结果
+                                varTrack.push(abs(value));//跟踪
+                            }
+
+                            /* 输出计算过程 */
+                            if (var instanceof Character) {
+                                System.out.println("|" + var + "| = " + list.peek() + "   " + var + " = " + value);
+                                logging("|" + var + "| = " + list.peek() + "   " + var + " = " + value);
+                            }//参数为变量的处理
+                            else if (var instanceof String) {
+                                if (var.equals("PI")) {
+                                    System.out.println("|π|" + " = " + list.peek() + "   π = " + PI);
+                                    logging("|π|" + " = " + list.peek() + "   π = " + PI);
+                                }
+                                else if (var.equals("Eu")) {
+                                    System.out.println("|e|" + " = " + list.peek() + "   e = " + Eu);
+                                    logging("|e|" + " = " + list.peek() + "   e = " + Eu);
+                                }
+                                else {
+                                    System.out.println("出现无法识别的符号：" + var);
+                                    logging("出现无法识别的符号：" + var);
+                                    return null;
+                                }
+                            }//参数为π和e的处理
+                            else {
+                                System.out.println("|" + value + "| = " + list.peek());
+                                logging("|" + value + "| = " + list.peek());
+                            }//参数为double或int数值类型的处理
+                        }//abs
+
+                        /* exp */
+                        else if (obj.equals("exp")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+
+                            /* 如果计算结果无限接近于某个整数，进行取整值 */
+                            if(Math.abs( exp(value) - Math.round(exp(value)) ) < 1e-15 ){
+                                double value_round = Math.round(exp(value));
+                                list.push(value_round);
+                                varTrack.add(value_round);
+                            }
+                            else {
+                                list.push(exp(value));//push计算结果
+                                varTrack.push(exp(value));//跟踪
+                            }
+
+                            /* 输出计算过程 */
+                            if (var instanceof Character) {
+                                System.out.println("exp" + var + " = " + list.peek() + "   " + var + " = " + value);
+                                logging("exp" + var + " = " + list.peek() + "   " + var + " = " + value);
+                            }//参数为变量的处理
+                            else if (var instanceof String) {
+                                if (var.equals("PI")) {
+                                    System.out.println("exp π" + " = " + list.peek() + "   π = " + PI);
+                                    logging("exp π" + " = " + list.peek() + "   π = " + PI);
+                                }
+                                else if (var.equals("Eu")) {
+                                    System.out.println("exp e" + " = " + list.peek() + "   e = " + Eu);
+                                    logging("exp e" + " = " + list.peek() + "   e = " + Eu);
+                                }
+                                else {
+                                    System.out.println("出现无法识别的符号：" + var);
+                                    logging("出现无法识别的符号：" + var);
+                                    return null;
+                                }
+                            }//参数为π和e的处理
+                            else {
+                                System.out.println("exp (" + value + ") = " + list.peek());
+                                logging("exp (" + value + ") = " + list.peek());
+                            }//参数为double或int数值类型的处理
+                        }//exp
+
+                        /* sh */
+                        else if (obj.equals("sh")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+                            /* 如果计算结果无限接近于某个整数，进行取整值 */
+                            if(Math.abs( sh(value) - Math.round(sh(value)) ) < 1e-15 ){
+                                double value_round = Math.round(sh(value));
+                                list.push(value_round);
+                                varTrack.add(value_round);
+                            }
+                            else {
+                                list.push(sh(value));//push计算结果
+                                varTrack.push(sh(value));//跟踪
+                            }
+
+                            /* 输出计算过程 */
+                            if (var instanceof Character) {
+                                System.out.println("sh" + var + " = " + list.peek() + "   " + var + " = " + value);
+                                logging("sh" + var + " = " + list.peek() + "   " + var + " = " + value);
+                            }//参数为变量的处理
+                            else if (var instanceof String) {
+                                if (var.equals("PI")) {
+                                    System.out.println("sh π" + " = " + list.peek() + "   π = " + PI);
+                                    logging("sh π" + " = " + list.peek() + "   π = " + PI);
+                                }
+                                else if (var.equals("Eu")) {
+                                    System.out.println("sh e" + " = " + list.peek() + "   e = " + Eu);
+                                    logging("sh e" + " = " + list.peek() + "   e = " + Eu);
+                                }
+                                else {
+                                    System.out.println("出现无法识别的符号：" + var);
+                                    logging("出现无法识别的符号：" + var);
+                                    return null;
+                                }
+                            }//参数为π和e的处理
+                            else {
+                                System.out.println("sh (" + value + ") = " + list.peek());
+                                logging("sh (" + value + ") = " + list.peek());
+                            }//参数为double或int数值类型的处理
+                        }//sh
+
+                        /* ch */
+                        else if (obj.equals("ch")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+                            /* 如果计算结果无限接近于某个整数，进行取整值 */
+                            if(Math.abs( ch(value) - Math.round(ch(value)) ) < 1e-15 ){
+                                double value_round = Math.round(ch(value));
+                                list.push(value_round);
+                                varTrack.add(value_round);
+                            }
+                            else {
+                                list.push(ch(value));//push计算结果
+                                varTrack.push(ch(value));//跟踪
+                            }
+
+                            /* 输出计算过程 */
+                            if (var instanceof Character) {
+                                System.out.println("ch" + var + " = " + list.peek() + "   " + var + " = " + value);
+                                logging("ch" + var + " = " + list.peek() + "   " + var + " = " + value);
+                            }//参数为变量的处理
+                            else if (var instanceof String) {
+                                if (var.equals("PI")) {
+                                    System.out.println("ch π" + " = " + list.peek() + "   π = " + PI);
+                                    logging("ch π" + " = " + list.peek() + "   π = " + PI);
+                                }
+                                else if (var.equals("Eu")) {
+                                    System.out.println("ch e" + " = " + list.peek() + "   e = " + Eu);
+                                    logging("ch e" + " = " + list.peek() + "   e = " + Eu);
+                                }
+                                else {
+                                    System.out.println("出现无法识别的符号：" + var);
+                                    logging("出现无法识别的符号：" + var);
+                                    return null;
+                                }
+                            }//参数为π和e的处理
+                            else {
+                                System.out.println("ch (" + value + ") = " + list.peek());
+                                logging("ch (" + value + ") = " + list.peek());
+                            }//参数为double或int数值类型的处理
+                        }//ch
+
+                        /* th */
+                        else if (obj.equals("th")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+                            /* 如果计算结果无限接近于某个整数，进行取整值 */
+                            if(Math.abs( th(value) - Math.round(th(value)) ) < 1e-15 ){
+                                double value_round = Math.round(th(value));
+                                list.push(value_round);
+                                varTrack.add(value_round);
+                            }
+                            else {
+                                list.push(th(value));//push计算结果
+                                varTrack.push(th(value));//跟踪
+                            }
+
+                            /* 输出计算过程 */
+                            if (var instanceof Character) {
+                                System.out.println("th" + var + " = " + list.peek() + "   " + var + " = " + value);
+                                logging("th" + var + " = " + list.peek() + "   " + var + " = " + value);
+                            }//参数为变量的处理
+                            else if (var instanceof String) {
+                                if (var.equals("PI")) {
+                                    System.out.println("th π" + " = " + list.peek() + "   π = " + PI);
+                                    logging("th π" + " = " + list.peek() + "   π = " + PI);
+                                }
+                                else if (var.equals("Eu")) {
+                                    System.out.println("th e" + " = " + list.peek() + "   e = " + Eu);
+                                    logging("th e" + " = " + list.peek() + "   e = " + Eu);
+                                }
+                                else {
+                                    System.out.println("出现无法识别的符号：" + var);
+                                    logging("出现无法识别的符号：" + var);
+                                    return null;
+                                }
+                            }//参数为π和e的处理
+                            else {
+                                System.out.println("th (" + value + ") = " + list.peek());
+                                logging("th (" + value + ") = " + list.peek());
+                            }//参数为double或int数值类型的处理
+                        }//th
+
+                        /* lg */
+                        else if (obj.equals("lg")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+                            /* 如果计算结果无限接近于某个整数，进行取整值 */
+                            if(Math.abs( lg(value) - Math.round(lg(value)) ) < 1e-15 ){
+                                double value_round = Math.round(lg(value));
+                                list.push(value_round);
+                                varTrack.add(value_round);
+                            }
+                            else {
+                                list.push(lg(value));//push计算结果
+                                varTrack.push(lg(value));//跟踪
+                            }
+
+                            /* 输出计算过程 */
+                            if (var instanceof Character) {
+                                System.out.println("lg" + var + " = " + list.peek() + "   " + var + " = " + value);
+                                logging("lg" + var + " = " + list.peek() + "   " + var + " = " + value);
+                            }//参数为变量的处理
+                            else if (var instanceof String) {
+                                if (var.equals("PI")) {
+                                    System.out.println("lg π" + " = " + list.peek() + "   π = " + PI);
+                                    logging("lg π" + " = " + list.peek() + "   π = " + PI);
+                                }
+                                else if (var.equals("Eu")) {
+                                    System.out.println("lg e" + " = " + list.peek() + "   e = " + Eu);
+                                    logging("lg e" + " = " + list.peek() + "   e = " + Eu);
+                                }
+                                else {
+                                    System.out.println("出现无法识别的符号：" + var);
+                                    logging("出现无法识别的符号：" + var);
+                                    return null;
+                                }
+                            }//参数为π和e的处理
+                            else {
+                                System.out.println("lg (" + value + ") = " + list.peek());
+                                logging("lg (" + value + ") = " + list.peek());
+                            }//参数为double或int数值类型的处理
+                        }//lg
+
+                        /* ln */
+                        else if (obj.equals("ln")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+                            /* 如果计算结果无限接近于某个整数，进行取整值 */
+                            if(Math.abs( ln(value) - Math.round(ln(value)) ) < 1e-15 ){
+                                double value_round = Math.round(ln(value));
+                                list.push(value_round);
+                                varTrack.add(value_round);
+                            }
+                            else {
+                                list.push(ln(value));//push计算结果
+                                varTrack.push(ln(value));//跟踪
+                            }
+
+                            /* 输出计算过程 */
+                            if (var instanceof Character) {
+                                System.out.println("ln" + var + " = " + list.peek() + "   " + var + " = " + value);
+                                logging("ln" + var + " = " + list.peek() + "   " + var + " = " + value);
+                            }//参数为变量的处理
+                            else if (var instanceof String) {
+                                if (var.equals("PI")) {
+                                    System.out.println("ln π" + " = " + list.peek() + "   π = " + PI);
+                                    logging("ln π" + " = " + list.peek() + "   π = " + PI);
+                                }
+                                else if (var.equals("Eu")) {
+                                    System.out.println("ln e" + " = " + list.peek() + "   e = " + Eu);
+                                    logging("ln e" + " = " + list.peek() + "   e = " + Eu);
+                                }
+                                else {
+                                    System.out.println("出现无法识别的符号：" + var);
+                                    logging("出现无法识别的符号：" + var);
+                                    return null;
+                                }
+                            }//参数为π和e的处理
+                            else {
+                                System.out.println("ln (" + value + ") = " + list.peek());
+                                logging("ln (" + value + ") = " + list.peek());
+                            }//参数为double或int数值类型的处理
+                        }//ln
+
+                        /* arcsin */
+                        else if (obj.equals("arcsin")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+                            /* value的取值范围是[-1,1] */
+                            double x = value instanceof Double ? (Double)value : (Integer)value;
+                            if(x < -1 || x > 1){
+                                System.out.println("arcsin的作用对象只能是[-1,1]的数，\"" + value + "\"不在范围之内！");
+                                return null;
+                            }
+                            /* 如果计算结果无限接近于某个整数，进行取整值 */
+                            if(Math.abs( arcsin(value) - Math.round(arcsin(value)) ) < 1e-15 ){
+                                double value_round = Math.round(th(value));
+                                list.push(value_round);
+                                varTrack.add(value_round);
+                            }
+                            list.push(arcsin(value));//push计算结果
+                            varTrack.push(arcsin(value));//跟踪
+
+                            String res = pify(list.peek());
+                            /* 输出计算过程 */
+                            if (var instanceof Character) {
+                                System.out.println("arcsin" + var + " = " + res + "   " + var + "=" + value + "   " + res + "=" + list.peek());
+                                logging("arcsin" + var + " = " + res + "   " + var + "=" + value + "   " + res + "=" + list.peek());
+                            }//参数为变量的处理
+                            else {
+                                System.out.println("arcsin (" + value + ") = " + res + "   " + res + " = " + list.peek());
+                                logging("arcsin (" + value + ") = " + res + "   " + res + " = " + list.peek());
+                            }//参数为double或int数值类型的处理
+                        }//arcsin
+
+                        /* arccos */
+                        else if (obj.equals("arccos")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+                            /* value的取值范围是[-1,1] */
+                            double x = value instanceof Double ? (Double)value : (Integer)value;
+                            if(x < -1 || x > 1){
+                                System.out.println("arccos的作用对象只能是[-1,1]的数，\"" + value + "\"不在范围之内！");
+                                return null;
+                            }
+                            /* 如果计算结果无限接近于某个整数，进行取整值 */
+                            if(Math.abs( arccos(value) - Math.round(arccos(value)) ) < 1e-15 ){
+                                double value_round = Math.round(th(value));
+                                list.push(value_round);
+                                varTrack.add(value_round);
+                            }
+                            else {
+                                list.push(arccos(value));//push计算结果
+                                varTrack.push(arccos(value));//跟踪
+                            }
+
+                            String res = pify(list.peek());//以π为因子的值
+                            /* 输出计算过程 */
+                            if (var instanceof Character) {
+                                System.out.println("arccos" + var + " = " + res + "   " + var + "=" + value + "   " + res + "=" + list.peek());
+                                logging("arccos" + var + " = " + res + "   " + var + "=" + value + "   " + res + "=" + list.peek());
+                            }//参数为变量的处理
+                            else {
+                                System.out.println("arccos (" + value + ") = " + res + "   " + res + " = " + list.peek());
+                                logging("arccos (" + value + ") = " + res + "   " + res + " = " + list.peek());
+                            }//参数为double或int数值类型的处理
+                        }//arccos
+
+                        /* arctan */
+                        else if (obj.equals("arctan")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+                            /* value的取值范围是[-1,1] */
+                            double x = value instanceof Double ? (Double)value : (Integer)value;
+                            /* 如果计算结果无限接近于某个整数，进行取整值 */
+                            if(Math.abs( arctan(value) - Math.round(arctan(value)) ) < 1e-15 ){
+                                double value_round = Math.round(arctan(value));
+                                list.push(value_round);
+                                varTrack.add(value_round);
+                            }
+                            else {
+                                list.push(arctan(value));//push计算结果
+                                varTrack.push(arctan(value));//跟踪
+                            }
+
+                            String res = pify(list.peek());//以π为因子的值
+                            /* 输出计算过程 */
+                            if (var instanceof Character) {
+                                System.out.println("arctan" + var + " = " + res + "   " + var + "=" + value + "   " + res + "=" + list.peek());
+                                logging("arctan" + var + " = " + res + "   " + var + "=" + value + "   " + res + "=" + list.peek());
+                            }//参数为变量的处理
+                            else if (var instanceof String) {
+                                if (var.equals("PI")) {
+                                    System.out.println("arctan π" + " = " + res +  "   " + res + "=" + list.peek());
+                                    logging("arctan π" + " = " + res + "   " + res + "=" + list.peek());
+                                }
+                                else if (var.equals("Eu")) {
+                                    System.out.println("arctan e" + " = " + res + "   " + res + "=" + list.peek());
+                                    logging("arctan e" + " = " + res + "   " + res + "=" + list.peek());
+                                }
+                                else {
+                                    System.out.println("出现无法识别的符号：" + var);
+                                    logging("出现无法识别的符号：" + var);
+                                    return null;
+                                }
+                            }//参数为π和e的处理
+                            else {
+                                System.out.println("arctan (" + value + ") = " + res + "   " + res + " = " + list.peek());
+                                logging("arctan (" + value + ") = " + res + "   " + res + " = " + list.peek());
+                            }//参数为double或int数值类型的处理
+                        }//arctan
+
+                        /* pify,将值转换成以PI为因子的式子，pify只能在最后处理结果时使用 */
+                        else if (obj.equals("pify")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+
+                            String finalResult = pify(value);//以π为因子的值
+                            /* 输出计算过程 */
+                            if (var instanceof Character) {
+                                System.out.println("pify" + var + " = " + finalResult + "   " + var + " = " + value);
+                                logging("pify" + var + " = " + finalResult + "   " + var + " = " + value);
+                            }//参数为变量的处理
+                            else if (var instanceof String) {
+                                if (var.equals("PI")) {
+                                    System.out.println("pify π" + " = " + finalResult);
+                                    logging("pify π" + " = " + finalResult);
+                                }
+                                else if (var.equals("Eu")) {
+                                    System.out.println("pify e" + " = " + finalResult + "   e = " + Eu);
+                                    logging("pify e" + " = " + finalResult + "   e = " + Eu);
+                                }
+                                else {
+                                    System.out.println("出现无法识别的符号：" + var);
+                                    logging("出现无法识别的符号：" + var);
+                                    return null;
+                                }
+                            }//参数为π和e的处理
+                            else {
+                                System.out.println("pify (" + value + ") = " + finalResult);
+                                logging("pify (" + value + ") = " + finalResult);
+                            }//参数为double或int数值类型的处理
+                            if(i < length - 1)
+                                System.out.println("pify只能在最后处理结果时使用！程序将自动将此时的结果作为最终结果.");
+                            return finalResult;
+                        }//pify
+
+                        /* frac,将值转换成分式，frac只能在最后处理结果时使用 */
+                        else if (obj.equals("frac")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+
+                            String finalResult = frac(value,maxDenominator);//以π为因子的值
+                            /* 输出计算过程 */
+                            if (var instanceof Character) {
+                                System.out.println("frac" + var + " = " + finalResult + "   " + var + " = " + value);
+                                logging("frac" + var + " = " + finalResult + "   " + var + " = " + value);
+                            }//参数为变量的处理
+                            else if (var instanceof String) {
+                                if (var.equals("PI")) {
+                                    System.out.println("frac π" + " = " + finalResult);
+                                    logging("frac π" + " = " + finalResult);
+                                }
+                                else if (var.equals("Eu")) {
+                                    System.out.println("frac e" + " = " + finalResult + "   e = " + Eu);
+                                    logging("frac e" + " = " + finalResult + "   e = " + Eu);
+                                }
+                                else {
+                                    System.out.println("出现无法识别的符号：" + var);
+                                    logging("出现无法识别的符号：" + var);
+                                    return null;
+                                }
+                            }//参数为π和e的处理
+                            else {
+                                System.out.println("frac (" + value + ") = " + finalResult);
+                                logging("frac (" + value + ") = " + finalResult);
+                            }//参数为double或int数值类型的处理
+                            if(i < length - 1)
+                                System.out.println("frac只能在最后处理结果时使用！程序将自动将此时的结果作为最终结果.");
+                            return finalResult;
+                        }//frac
+
+                        /* arsh */
+                        else if (obj.equals("arsh")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+                            /* value的取值范围是[-1,1] */
+                            double x = value instanceof Double ? (Double)value : (Integer)value;
+                            /* 如果计算结果无限接近于某个整数，进行取整值 */
+                            if(Math.abs( arsh(value) - Math.round(arsh(value)) ) < 1e-15 ){
+                                double value_round = Math.round(arsh(value));
+                                list.push(value_round);
+                                varTrack.add(value_round);
+                            }
+                            list.push(arsh(value));//push计算结果
+                            varTrack.push(arsh(value));//跟踪
+
+                            /* 输出计算过程 */
+                            if (var instanceof Character) {
+                                System.out.println("arsh" + var + " = " + list.peek() + "   " + var + " = " + value);
+                                logging("arsh" + var + " = " + list.peek() + "   " + var + " = " + value);
+                            }//参数为变量的处理
+                            else if (var instanceof String) {
+                                if (var.equals("PI")) {
+                                    System.out.println("arsh π" + " = " + list.peek() + "   π = " + PI);
+                                    logging("arsh π" + " = " + list.peek() + "   π = " + PI);
+                                }
+                                else if (var.equals("Eu")) {
+                                    System.out.println("arsh e" + " = " + list.peek() + "   e = " + Eu);
+                                    logging("arsh e" + " = " + list.peek() + "   e = " + Eu);
+                                }
+                                else {
+                                    System.out.println("出现无法识别的符号：" + var);
+                                    logging("出现无法识别的符号：" + var);
+                                    return null;
+                                }
+                            }//参数为π和e的处理
+                            else {
+                                System.out.println("arsh (" + value + ") = " + list.peek());
+                                logging("arsh (" + value + ") = " + list.peek());
+                            }//参数为double或int数值类型的处理
+                        }//arsh
+
+                        /* arch */
+                        else if (obj.equals("arch")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+                            /* value的取值范围是[-1,1] */
+                            double x = value instanceof Double ? (Double)value : (Integer)value;
+                            /* 如果计算结果无限接近于某个整数，进行取整值 */
+                            if(Math.abs( arch(value) - Math.round(arch(value)) ) < 1e-15 ){
+                                double value_round = Math.round(arch(value));
+                                list.push(value_round);
+                                varTrack.add(value_round);
+                            }
+                            list.push(arch(value));//push计算结果
+                            varTrack.push(arch(value));//跟踪
+
+                            /* 输出计算过程 */
+                            if (var instanceof Character) {
+                                System.out.println("arch" + var + " = " + list.peek() + "   " + var + " = " + value);
+                                logging("arch" + var + " = " + list.peek() + "   " + var + " = " + value);
+                            }//参数为变量的处理
+                            else if (var instanceof String) {
+                                if (var.equals("PI")) {
+                                    System.out.println("arch π" + " = " + list.peek() + "   π = " + PI);
+                                    logging("arch π" + " = " + list.peek() + "   π = " + PI);
+                                }
+                                else if (var.equals("Eu")) {
+                                    System.out.println("arch e" + " = " + list.peek() + "   e = " + Eu);
+                                    logging("arch e" + " = " + list.peek() + "   e = " + Eu);
+                                }
+                                else {
+                                    System.out.println("出现无法识别的符号：" + var);
+                                    logging("出现无法识别的符号：" + var);
+                                    return null;
+                                }
+                            }//参数为π和e的处理
+                            else {
+                                System.out.println("arch (" + value + ") = " + list.peek());
+                                logging("arch (" + value + ") = " + list.peek());
+                            }//参数为double或int数值类型的处理
+                        }//arch
+
+                        /* arth */
+                        else if (obj.equals("arth")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+                            /* value的取值范围是[-1,1] */
+                            double x = value instanceof Double ? (Double)value : (Integer)value;
+                            if(x < -1 || x > 1){
+                                System.out.println("arth的作用对象只能是[-1,1]的数，\"" + value + "\"不在范围之内！");
+                                return null;
+                            }
+                            /* 如果计算结果无限接近于某个整数，进行取整值 */
+                            if(Math.abs( arth(value) - Math.round(arth(value)) ) < 1e-15 ){
+                                double value_round = Math.round(arth(value));
+                                list.push(value_round);
+                                varTrack.add(value_round);
+                            }
+                            list.push(arth(value));//push计算结果
+                            varTrack.push(arth(value));//跟踪
+
+                            /* 输出计算过程 */
+                            if (var instanceof Character) {
+                                System.out.println("arth" + var + " = " + list.peek() + "   " + var + " = " + value);
+                                logging("arth" + var + " = " + list.peek() + "   " + var + " = " + value);
+                            }//参数为变量的处理
+                            else if (var instanceof String) {
+                                if (var.equals("PI")) {
+                                    System.out.println("arth π" + " = " + list.peek() + "   π = " + PI);
+                                    logging("arth π" + " = " + list.peek() + "   π = " + PI);
+                                }
+                                else if (var.equals("Eu")) {
+                                    System.out.println("arth e" + " = " + list.peek() + "   e = " + Eu);
+                                    logging("arth e" + " = " + list.peek() + "   e = " + Eu);
+                                }
+                                else {
+                                    System.out.println("出现无法识别的符号：" + var);
+                                    logging("出现无法识别的符号：" + var);
+                                    return null;
+                                }
+                            }//参数为π和e的处理
+                            else {
+                                System.out.println("arth (" + value + ") = " + list.peek());
+                                logging("arth (" + value + ") = " + list.peek());
+                            }//参数为double或int数值类型的处理
+                        }//arth
 
                     }
                 }//输出计算过程
@@ -796,7 +1848,7 @@ public class AntiPolish {
                 char ch = (char)obj;
                 if(ch >= 'a' && ch <=  'z'){
                     if(varSet_az_value[ch - 'a'] == null){
-                        System.out.printf("变量%c未进行赋值！",ch);
+                        System.out.printf("变量%c未进行赋值！\n",ch);
                         return null;
                     }
                     list.push(varSet_az_value[ch - 'a']);
@@ -804,7 +1856,7 @@ public class AntiPolish {
                 }
                 else if(ch >= 'A' && ch <= 'Z'){
                     if(varSet_AZ_value[ch - 'A'] == null){
-                        System.out.printf("变量%c未进行赋值！",ch);
+                        System.out.printf("变量%c未进行赋值！\n",ch);
                         return null;
                     }
                     list.push(varSet_AZ_value[ch - 'A']);
@@ -814,6 +1866,11 @@ public class AntiPolish {
                     if(ch == '!' || ch == '！'){
                         Object value = list.pop();//获取计算值
                         Object var = varTrack.pop();//追踪
+                        //value必须大于等于0
+                        if((value instanceof Integer ? (Integer)value : (Double)value) < 0){
+                            System.out.println("阶乘只能应用于大于0的数，\"" + value + "\"为小于0的数！");
+                            return null;
+                        }
                         list.push(fact(value));//push计算结果
                         varTrack.push(fact(value));//跟踪
                         /* 输入计算过程 */
@@ -847,11 +1904,17 @@ public class AntiPolish {
                     else {
                         int flag = 0;//用于判断value1和value2的类型
                         Object value1, value2;
-                        value1 = list.pop();//权值1，Integer为1，Double为0
-                        value2 = list.pop();//权值2，Integer为1，Double为0
                         Object obj1, obj2;
+                        value1 = list.pop();//权值1，Integer为1，Double为0
                         obj1 = varTrack.pop();//跟踪
-                        obj2 = varTrack.pop();//跟踪
+                        if(!list.isEmpty()) {
+                            value2 = list.pop();//权值2，Integer为1，Double为0
+                            obj2 = varTrack.pop();//跟踪
+                        }
+                        else{
+                            value2 = 0;//这里实现当只出现一个负号时可以表示为负数
+                            obj2 = 0;//跟踪
+                        }
                         if (value1 instanceof Integer)
                             flag += 1;
                         if (value2 instanceof Integer)
@@ -929,6 +1992,11 @@ public class AntiPolish {
                                 break;
                             }
                             case '/': {
+                                /* 当除数为0 */
+                                if((value1 instanceof Integer ? (Integer)value1 : (Double)value1) < 0){
+                                    System.out.println("除数不能为0！在\"" + value2 + "/" + value1 + "\"的计算中除数为0.");
+                                    return null;
+                                }
                                 switch (flag) {
                                     case 0: {
                                         list.push((Double) value2 / (Double) value1);
@@ -950,6 +2018,11 @@ public class AntiPolish {
                                 break;
                             }
                             case '%': {
+                                /* 当取余运算中出现小数 */
+                                if(value2 instanceof Double)
+                                    System.out.println("在" + value2 + "%" + value1 + "的计算中，\"" + value2 + "\"为小数，已自动将计算转为除法运算." );
+                                if(value2 instanceof Double)
+                                    System.out.println("在" + value2 + "%" + value1 + "的计算中，\"" + value1 + "\"为小数，已自动将计算转为除法运算." );
                                 switch (flag) {
                                     case 0: {
                                         list.push((Double) value2 / (Double) value1);
@@ -1039,32 +2112,6 @@ public class AntiPolish {
         return list.pop();//将最后求得的值返回
     }
 
-    static String inputVarSet(){
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("请输入变量集($开启和结束输入)：");
-        String varSet = "";
-        String input = scanner.nextLine();
-        if(!input.startsWith("$")){
-            System.out.println("格式错误，变量集的书写必须以$开头并以$结束.");
-            return null;
-        }
-        while(!input.endsWith("$")){
-            varSet = varSet.concat("\n" + input);
-            input = scanner.nextLine();
-        }
-        if(varSet.length() > 0)
-            varSet = varSet.concat("\n" + input);
-        else
-            varSet = varSet.concat(input);
-        System.out.println(varSet);
-        return varSet;
-    }
-
-    static void ls(){
-        for(String expression: mathExpression)
-            System.out.println(expression);
-    }
-
     static void calculate(){
         Scanner userInput = new Scanner(System.in);
         System.out.print("请输入数学计算表达式：");
@@ -1075,13 +2122,30 @@ public class AntiPolish {
         String currentTimeString = currentTime.format(formatter);// 将当前时间格式化为字符串
         mathExpression.add(currentTimeString + "   " + expression);//记录输入的计算表达式
         logging(new Date() + " 计算数学表达式：" + expression);
-        logging("计算过程：");
-        System.out.println("- - - - - - - - - - - - - - - - - - - -");
         System.out.println("计算过程：");
-        ArrayList  postfixNotation = (ArrayList) antiPolish(expression);
+        logging("计算过程：");
+        ArrayList postfixNotation;
+        try {
+            postfixNotation = (ArrayList) antiPolish(expression);
+        }catch(Exception ex){
+            System.out.println("您所输入的表达式\"" + expression + "\"无法计算！");
+            return;
+        }
         Object result = antiPolishEvaluate(postfixNotation);
-        if(result != null)
-            System.out.println("结果是：" + result);
+        if(result != null) {
+            System.out.print("计算结果是：");
+            if(result instanceof Integer)
+                System.out.println(result);
+            else if(result instanceof Double){
+                double res = (Double)result;
+                if(Math.abs(res - Math.round(res)) > 1e-15)
+                    System.out.println(res);
+                else
+                    System.out.println(Math.round(res));
+            }
+            else
+                System.out.println(result);//String
+        }
     }
 
     static void directCaculate(String expression){
@@ -1092,33 +2156,61 @@ public class AntiPolish {
         mathExpression.add(currentTimeString + "   " + expression);//记录输入的计算表达式
         logging(new Date() + " 计算数学表达式：" + expression);
         logging("计算过程：");
-        System.out.println("- - - - - - - - - - - - - - - - - - - -");
         System.out.println("计算过程：");
-        ArrayList  postfixNotation = (ArrayList) antiPolish(expression);
+        ArrayList  postfixNotation;
+        try {
+            postfixNotation = (ArrayList) antiPolish(expression);
+        }catch(Exception ex){
+            System.out.println("您所输入的表达式\"" + expression + "\"无法计算！");
+            return;
+        }
         Object result = antiPolishEvaluate(postfixNotation);
-        if(result != null)
-            System.out.println("结果是：" + result);
+        if(result != null) {
+            System.out.print("计算结果是：");
+            if(result instanceof Integer)
+                System.out.println(result);
+            else if(result instanceof Double){
+                double res = (Double)result;
+                if(Math.abs(res - Math.round(res)) > 1e-15)
+                    System.out.println(res);
+                else
+                    System.out.println(Math.round(res));
+            }
+            else
+                System.out.println(result);//String
+        }
+    }
+
+    /* 列出所有输入过的计算表达式 */
+    static void ls(){
+        for(String expression: mathExpression)
+            System.out.println(expression);
     }
 
     static void help(){
+        System.out.println("计算    当你输入的命令是一条计算表达式时，程序会自动将其识别出并计算该计算表达式");
         System.out.println("exit   退出程序");
         System.out.println("adcg   添加或设置变量，变量名只能是大小写字母，变量未赋值时初始为null，程序根据你提交的变量集对对应的变量进行赋值");
         System.out.println("read   将根据你输入的指定路径读取变量集并给对应的变量进行赋值");
         System.out.println("save   将根据你输入的指定路径读取变量集并给对应的变量进行赋值");
         System.out.println("var    显示所有已经进行赋值过的变量");
         System.out.println("""
-                antipo 输入计算表达式进行计算，程序将会给出它的每一步计算过程以及计算结果，计算支持下列运算符：
+                antipo 输入计算表达式进行计算，程序将会给出它的每一步计算过程以及计算结果
+                       程序计算支持下列符号运算符：
                        加法+、减法-、乘法*、除法/、取余运算%、幂运算^、阶乘运算(!/！)、
-                       正弦sin、余弦cos、正切tan、双曲正弦sh、双曲余弦ch、双曲正切th、
+                       同时支持下列函数运算符：
+                       正弦sin、余弦cos、正切tan、取绝对值abs = |x|、
+                       双曲正弦sh x = (e^x - e ^ -x)/2、双曲余弦ch x = (e ^ x + e ^ -x)/2、双曲正切th x = sh x / chx、
                        反正弦arcsin、反余弦arccos、反正切arctan、以10为底的对数lg、以e为底的对数ln
                        对于sin、cos、tan等等这些函数运算符，不限制大小写，程序会自动将字母统一转换成小写再处理
+                       运算优先级：{+ -} < {* / %} < {^} < {!} = {sin、cos等等所有函数运算符}
                        计算支持两大常数：圆周率π用PI表示、自然常数e用Eu表示
                        支持使用中英文圆括号()/（）、方括号[]、来改变运算顺序，注意中英文括号可以混合使用，例如左边为中文括号右边为英文括号。
                 """);
         System.out.println("""
                 ls     列出所有之前输入的计算表达式，以时间+计算表达式的形式呈现，例如：
                        11:14:38   sin PI + cos PI
-                       11:15:59   sin(PI / 2 + 3.5 * PI) + cos(PI - 0.25 * PI
+                       11:15:59   sin(PI / 2 + 3.5 * PI) + cos(PI - 0.25 * PI)
                 """);
         System.out.println("""
                 变量集   变量集的编写需要以$开始并以$结尾，中间赋值语句的书写格式为：变量名 = 值
@@ -1148,8 +2240,10 @@ public class AntiPolish {
                 System.out.println("注：所有命令不限制字母的大小写");
             }
             System.out.print(inputAnchor);
-            String command;
+            String command,expression;
             command = userInput.nextLine();
+            expression = command;//如果输入的是计算表达式那么保留原始输入的字符串
+            command = command.toLowerCase();//命令不限大小写
             option = switch (command) {
                 case "exit" -> 0;
                 case "adcg" -> 1;
@@ -1219,8 +2313,8 @@ public class AntiPolish {
                 }
                 default: {
                     /* 如果输入的命令是计算表达式，直接进行计算 */
-                    if(isExpression(command))
-                        directCaculate(command);
+                    if(antiPolishTest(expression))
+                        directCaculate(expression);
                     else {
                         System.out.println("无法识别命令！");
                         logging(new Date() + "无法识别命令：" + command);
@@ -1241,11 +2335,11 @@ public class AntiPolish {
         /*
         测试将数字转为带π的式子
         String str = Double.toString(8.5 * PI);
-        System.out.println(toPIFraction(str));//0.3π
-        System.out.println(toPIFraction(2.4 * PI));
-        System.out.println(toPIFraction(5/12.0 * PI));
-        System.out.println(toPIFraction(17.0/9 * PI));
-        System.out.println(toPIFraction(3.9 * PI));
+        System.out.println(pify(str));//0.3π
+        System.out.println(pify(2.4 * PI));
+        System.out.println(pify(5/12.0 * PI));
+        System.out.println(pify(17.0/9 * PI));
+        System.out.println(pify(3.9 * PI));
          */
 
     }
