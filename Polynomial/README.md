@@ -1,12 +1,11 @@
                                             多项式计算器——Java实现
 
-
-Element类
+1.Element类
 用Element类表示多项式的中的一项，它的系数和次方都是用double类型，因此即使是次方出现小数同样也能计算。
 
 
 
-Polynomial类
+2.Polynomial类
 用Polynomial类表示一个多项式，每一个Polynimial对象有一个成员为Element对象的ArrayList，将多项式的每一项存放在ArrayList中，ArrayList可以实现多项式的项数不受限制。
 
 多项式中一项的添加是通过插入法实现，为了让多项式按每一项的次方大小来排序，每一次向ArrayList中添加Element对象都要找到合适的位置再插入。
@@ -17,17 +16,17 @@ Polynomial类
 
 
 
-Digit接口
+3.Digit接口
 Digit实现获取整数的位数和小数的位数
 
 
 
-Result类
+4.Result类
 Result类用于存储多项式的计算结果，在计算中每一次的计算结果可以通过Result类来管理，该类提供了一个方法打印所有保存的计算结果。
 
 
 
-PolynomialOperation类(核心）
+5.PolynomialOperation类(核心）
 实现多项式的加减乘以及幂运算，通过下面的add()、sub()、mult()、pow()四个方法实现
 
 add(polynomial poly1,polynomial poly2)方法实现多项式加法，Polynomial类中有一个add()方法可以将多项式的项Element对象添加到一个Polynomial对象中，对于两个多项式Poly1和Poly2，要计算poly1+poly2，假设poly1的项数大于等于poly2，那么我们为了不影响poly1对象，我们深复制一份poly1对象，这里选取项数多的对象poly1主要是为了减少计算步骤，在将poly2中的所有项添加到复制的poly1对象中后，复制的poly1对象就是计算结果。
@@ -46,7 +45,7 @@ pow(polynomial poly,int power)方法实现多项式的幂运算，幂运算我�
 
 
 
-PolynomialCalculator类
+6.PolynomialCalculator类
 这个类实现多项式计算器，用户的与程序的交互操作在里面实现，它提供了一系列的方法增加使用体验。
 
 计算器中可以存储两个多项式poly1和poly2用于计算，这两个多项式可以通过输入获得，或者从计算结果中导入，每一次的多项式输入会覆盖这两个多项式。
