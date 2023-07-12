@@ -1,6 +1,6 @@
 public interface Digit {
     //获取整数位数
-    public default int getIntegerDigit(double num){
+    default int getIntegerDigit(double num){
         int digit = 0;
         int t = (int) Math.floor(num);//向下取整
         while(t > 0){
@@ -9,8 +9,9 @@ public interface Digit {
         }
         return digit;
     }
+
     //获取小数位数
-    public default int getDecimalDigit(double num){
+    default int getDecimalDigit(double num){
         int digit = 0;
         double t = num - (int)Math.floor(num);
         while(t - Math.floor(t) > 1e-9){

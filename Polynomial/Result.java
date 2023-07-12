@@ -4,6 +4,7 @@ public class Result implements Cloneable{
     Polynomial poly2;
     Polynomial res;
     String operator;
+
     /* 构造方法 */
     public Result(Polynomial poly1,Polynomial poly2,Polynomial res,String operator) throws CloneNotSupportedException {
         if(poly1 != null) this.poly1 = poly1.clone();

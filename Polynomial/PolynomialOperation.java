@@ -1,7 +1,5 @@
+/* 多项式的运算类，实现多项式的加减乘以及幂运算 */
 public class PolynomialOperation {
-    //构造方法
-    public PolynomialOperation(){
-    }
     /* 多项式加法 */
     public Polynomial add(Polynomial poly1,Polynomial poly2)  throws CloneNotSupportedException {
         if(poly1 == null || poly1.poly == null || poly1 == null || poly2.poly == null)
@@ -25,7 +23,7 @@ public class PolynomialOperation {
     }
 
     /* 多项式减法 */
-    public Polynomial sub(Polynomial poly1,Polynomial poly2) throws CloneNotSupportedException {
+    public Polynomial sub(Polynomial poly1,Polynomial poly2) {
         if(poly1 == null || poly1.poly == null || poly1 == null || poly2.poly == null)
             return null;
         Polynomial res ;

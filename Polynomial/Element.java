@@ -1,12 +1,13 @@
 public class Element implements Cloneable{
     /* 数据域 */
-    double coef;//系数
-    double power;//次方
+    public double coef;//系数
+    public double power;//次方
     /* 构造方法 */
     public Element(double coef,double power){
         this.coef = coef;
         this.power = power;
     }
+
     /* 访问器 */
     public void setCoef(double coef){
         this.coef = coef;
@@ -14,6 +15,7 @@ public class Element implements Cloneable{
     public void setPower(double power){
         this.power = power;
     }
+
     /* 修改器 */
     public double getCoef() {
         return this.coef;

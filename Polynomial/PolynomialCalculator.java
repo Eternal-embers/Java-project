@@ -1,7 +1,9 @@
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
-public class PolynomialCaculator {
+/* 多项式计算器，交互操作在此类中实现 */
+public class PolynomialCalculator {
     static ArrayList<Result> results;
     static Polynomial poly1;//等号左边第一个多项式
     static Polynomial poly2;//等号左边第二个多项式
@@ -9,7 +11,8 @@ public class PolynomialCaculator {
     static Scanner input;
     static PolynomialOperation operation;
 
-    public PolynomialCaculator(){
+    /* 构造方法 */
+    public PolynomialCalculator(){
         results = new ArrayList<>();
         poly1 = null;
         poly2 = null;
@@ -19,37 +22,54 @@ public class PolynomialCaculator {
     }
 
     /* 主菜单 */
-    public static int mainMenu(){
+    public static int mainMenu() throws InputMismatchException{
+        int option;
         System.out.println("[主菜单]");
-        System.out.println("退出 - - - - - - - - - - 0");
-        System.out.println("查看现有多项式 - - - - - - 1");
-        System.out.println("使用现有多项式进行运算- - - -2");
-        System.out.println("导入多项式- - - - - - - - -3");
-        System.out.println("输入多项式进行运算- - - - - -4");
-        System.out.println("查看结果集- - - - - - - - -5");
-        System.out.println("清空结果集- - - - - - - - -6");
-        System.out.println("多项式赋值运算 - - - - - - -7");
+        System.out.println("退出 - - - - - - - - - - - 0");
+        System.out.println("查看现有多项式 - - - - - - - 1");
+        System.out.println("使用现有多项式进行运算- - - - -2");
+        System.out.println("输入多项式进行运算- - - - - - 3");
+        System.out.println("导入多项式- - - - - - - - - 4");
+        System.out.println("查看结果集- - - - - - - - - 5");
+        System.out.println("清空结果集- - - - - - - - - 6");
+        System.out.println("多项式赋值运算 - - - - - - - 7");
         System.out.print(">>");
-        int option = input.nextInt();
+        try {
+            option = input.nextInt();
+        }catch (Exception e) {
+            input.nextLine();//消除错误输入
+            System.out.println("输入错误！");
+            System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                    + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+            throw new InputMismatchException();
+        }
         System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
                 + " - - - - - - - - - - - - - - - - - - - - - - - - ");
         return option;
     }
 
     /* 多项式的运算菜单 */
-    public static int menu(){
+    public static int menu() throws InputMismatchException{
+        int option;
         System.out.println("[运算菜单]");
-        System.out.println("返回 - - - - - - - -0");
+        System.out.println("退出- - - - - - - - 0");
         System.out.println("多项式加法 - - - - - 1");
         System.out.println("多项式减法 - - - - - 2");
         System.out.println("多项式乘法 - - - - - 3");
         System.out.println("多项式的幂运算 - - - -4");
         System.out.print(">>");
-        int option = input.nextInt();
-        if(option != 0){
+        try {
+            option = input.nextInt();
+        }catch (Exception e) {
+            input.nextLine();//消除错误输入
+            System.out.println("输入错误！");
             System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
                     + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+            throw new InputMismatchException();
         }
+        if(option != 0)
+            System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                + " - - - - - - - - - - - - - - - - - - - - - - - - ");
         return option;
     }
 
@@ -88,131 +108,134 @@ public class PolynomialCaculator {
     }
 
     /* 输入多项式进行计算 */
-    public static void caculate(int option) throws CloneNotSupportedException {
-        switch(option){
-            case 0: return;
-            case 1: {
-                System.out.println("\t\t\t\t\t\t       [多项式的加法运算]");
-                System.out.println("\t\t\t\t\t\t>>>系数和指数都输入为0时结束输入<<<");
-                System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
-                        + " - - - - - - - - - - - - - - - - - - - - - - - - ");
-                System.out.println("<Poly1>");
-                poly1 = polyInput();
-                System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
-                        + " - - - - - - - - - - - - - - - - - - - - - - - - ");
-                System.out.println("<Poly2>");
-                poly2 = polyInput();
-                poly3 = operation.add(poly1,poly2);
-                System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
-                        + " - - - - - - - - - - - - - - - - - - - - - - - - ");
-                System.out.println("<计算结果>");
-                poly3.printPoly();
-                System.out.print("\n是否需要保存计算结果？(Y/N) >>");
-                String save = input.next();
-                if(save.contains("Y")) saveResult(poly1,poly2,poly3,"+");
-                System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
-                        + " - - - - - - - - - - - - - - - - - - - - - - - - ");
-                break;
-            }
-            case 2:{
-                System.out.println("\t\t\t\t\t\t       [多项式的减法运算]");
-                System.out.println("\t\t\t\t\t\t>>>系数和指数都输入为0时结束输入<<<");
-                System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
-                        + " - - - - - - - - - - - - - - - - - - - - - - - - ");
-                System.out.println("<Poly1>");
-                poly1 = polyInput();
-                System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
-                        + " - - - - - - - - - - - - - - - - - - - - - - - - ");
-                System.out.println("<Poly2>");
-                poly2 = polyInput();
-                poly3 = operation.sub(poly1,poly2);
-                System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
-                        + " - - - - - - - - - - - - - - - - - - - - - - - - ");
-                System.out.println("<计算结果>");
-                poly3.printPoly();
-                System.out.print("\n是否需要保存计算结果？(Y/N) >>");
-                String save = input.next();
-                if(save.contains("Y")) saveResult(poly1,poly2,poly3,"-");
-                System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
-                        + " - - - - - - - - - - - - - - - - - - - - - - - - ");
-                break;
-            }
-            case 3:{
-                System.out.println("\t\t\t\t\t\t       [多项式的乘法运算]");
-                System.out.println("\t\t\t\t\t\t>>>系数和指数都输入为0时结束输入<<<");
-                System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
-                        + " - - - - - - - - - - - - - - - - - - - - - - - - ");
-                System.out.println("<Poly1>");
-                poly1 = polyInput();
-                System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
-                        + " - - - - - - - - - - - - - - - - - - - - - - - - ");
-                System.out.println("<Poly2>");
-                poly2 = polyInput();
-                System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
-                        + " - - - - - - - - - - - - - - - - - - - - - - - - ");
-                poly3 = operation.mult(poly1,poly2);
-                System.out.println("<计算结果>");
-                poly3.printPoly();
-                System.out.print("\n是否需要保存计算结果？(Y/N) >>");
-                String save = input.next();
-                if(save.contains("Y")) saveResult(poly1,poly2,poly3,"*");
-                System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
-                        + " - - - - - - - - - - - - - - - - - - - - - - - - ");
-                break;
-            }
-            case 4:{
-                System.out.println("\t\t\t\t\t\t       [多项式的幂运算]");
-                System.out.println("\t\t\t\t\t\t>>>系数和指数都输入为0时结束输入<<<");
-                System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
-                        + " - - - - - - - - - - - - - - - - - - - - - - - - ");
-                System.out.println("<Poly1>");
-                poly1 = polyInput();
-                System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
-                        + " - - - - - - - - - - - - - - - - - - - - - - - - ");
-                System.out.print("多项式的指数为：");
-                int power = input.nextInt();
-                String operator = null;
-                switch(power){
-                    case 0: operator = "^0"; break;
-                    case 1: operator = "^1"; break;
-                    case 2: operator = "^2"; break;
-                    case 3: operator = "^3"; break;
-                    case 4: operator = "^4"; break;
-                    case 5: operator = "^5"; break;
-                    case 6: operator = "^6"; break;
-                    case 7: operator = "^7"; break;
-                    case 8: operator = "^8"; break;
-                    case 9: operator = "^9"; break;
-                    case 10: operator = "^10"; break;
-                }
-                poly3 = operation.pow(poly1,power);
-                System.out.println("<计算结果>");
-                poly3.printPoly();
-                if(power > 10) {
-                    System.out.println("\n暂时不支持保存10次方以上的结果!");
+    public static void calculate(int option) throws Exception {
+        try{
+            switch(option) {
+                case 0:
+                    return;
+                case 1: {
+                    System.out.println("\t\t\t\t\t\t       [多项式的加法运算]");
+                    System.out.println("\t\t\t\t\t\t>>>系数和指数都输入为0时结束输入<<<");
                     System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
                             + " - - - - - - - - - - - - - - - - - - - - - - - - ");
-                    return;
+                    System.out.println("<Poly1>");
+                    poly1 = polyInput();
+                    System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                            + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+                    System.out.println("<Poly2>");
+                    poly2 = polyInput();
+                    poly3 = operation.add(poly1, poly2);
+                    System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                            + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+                    System.out.println("<计算结果>");
+                    poly3.printPoly();
+                    System.out.print("\n是否需要保存计算结果？(Y/N) >>");
+                    String save = input.next();
+                    if (save.contains("Y")) saveResult(poly1, poly2, poly3, "+");
+                    System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                            + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+                    break;
                 }
-                System.out.print("\n是否需要保存计算结果？(Y/N) >>");
-                String save = input.next();
-                if(save.contains("Y")) saveResult(poly1,poly2,poly3,operator);
-                System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
-                        + " - - - - - - - - - - - - - - - - - - - - - - - - ");
-                break;
+                case 2: {
+                    System.out.println("\t\t\t\t\t\t       [多项式的减法运算]");
+                    System.out.println("\t\t\t\t\t\t>>>系数和指数都输入为0时结束输入<<<");
+                    System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                            + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+                    System.out.println("<Poly1>");
+                    poly1 = polyInput();
+                    System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                            + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+                    System.out.println("<Poly2>");
+                    poly2 = polyInput();
+                    poly3 = operation.sub(poly1, poly2);
+                    System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                            + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+                    System.out.println("<计算结果>");
+                    poly3.printPoly();
+                    System.out.print("\n是否需要保存计算结果？(Y/N) >>");
+                    String save = input.next();
+                    if (save.contains("Y")) saveResult(poly1, poly2, poly3, "-");
+                    System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                            + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+                    break;
+                }
+                case 3: {
+                    System.out.println("\t\t\t\t\t\t       [多项式的乘法运算]");
+                    System.out.println("\t\t\t\t\t\t>>>系数和指数都输入为0时结束输入<<<");
+                    System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                            + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+                    System.out.println("<Poly1>");
+                    poly1 = polyInput();
+                    System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                            + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+                    System.out.println("<Poly2>");
+                    poly2 = polyInput();
+                    System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                            + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+                    poly3 = operation.mult(poly1, poly2);
+                    System.out.println("<计算结果>");
+                    poly3.printPoly();
+                    System.out.print("\n是否需要保存计算结果？(Y/N) >>");
+                    String save = input.next();
+                    if (save.contains("Y")) saveResult(poly1, poly2, poly3, "*");
+                    System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                            + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+                    break;
+                }
+                case 4: {
+                    System.out.println("\t\t\t\t\t\t       [多项式的幂运算]");
+                    System.out.println("\t\t\t\t\t\t>>>系数和指数都输入为0时结束输入<<<");
+                    System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                            + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+                    System.out.println("<Poly1>");
+                    poly1 = polyInput();
+                    System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                            + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+                    System.out.print("多项式的指数为：");
+                    int power = input.nextInt();
+                    String operator = null;
+                    operator = "^" + power;//设置指数
+                    poly3 = operation.pow(poly1, power);
+                    System.out.println("<计算结果>");
+                    poly3.printPoly();
+                    if (power > 10) {
+                        System.out.println("\n暂时不支持保存10次方以上的结果!");
+                        System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                                + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+                        return;
+                    }
+                    System.out.print("\n是否需要保存计算结果？(Y/N) >>");
+                    String save = input.next();
+                    if (save.contains("Y")) saveResult(poly1, poly2, poly3, operator);
+                    System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                            + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+                    break;
+                }
+                default: {
+                    System.out.println("选项输入错误！请重重新输入");
+                    break;
+                }
             }
-            default: {
-                System.out.println("选项输入错误！请重重新输入"); break;
-            }
+        }catch(Exception ex){
+            throw ex;
         }
     }
 
-    public static void directCaculate() throws CloneNotSupportedException {
+    public static void directCalculate() throws CloneNotSupportedException {
         if(poly1 == null && poly2 == null) {
             System.out.println("poly1和poly2均为空!");
             return;
         }
-        int option = menu();
+        int option = 5;
+        try {
+            option = menu();
+        }catch (Exception e) {
+            input.nextLine();//消除错误输入
+            System.out.println("输入错误！");
+            System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
+                    + " - - - - - - - - - - - - - - - - - - - - - - - - ");
+            throw new InputMismatchException();
+        }
         switch(option){
             case 0: return;
             case 1: {
@@ -279,19 +302,7 @@ public class PolynomialCaculator {
                 System.out.print("多项式的指数为：");
                 int power = input.nextInt();
                 String operator = null;
-                switch(power){
-                    case 0: operator = "^0"; break;
-                    case 1: operator = "^1"; break;
-                    case 2: operator = "^2"; break;
-                    case 3: operator = "^3"; break;
-                    case 4: operator = "^4"; break;
-                    case 5: operator = "^5"; break;
-                    case 6: operator = "^6"; break;
-                    case 7: operator = "^7"; break;
-                    case 8: operator = "^8"; break;
-                    case 9: operator = "^9"; break;
-                    case 10: operator = "^10"; break;
-                }
+                operator = "^" + power;//设置指数
                 poly3 = operation.pow(poly,power);
                 System.out.println("<计算结果>");
                 poly3.printPoly();
@@ -339,7 +350,7 @@ public class PolynomialCaculator {
     }
 
     /* 从结果集导入多项式 */
-    public static void importPoly() throws CloneNotSupportedException {
+    public static void importPolyFromResults() throws CloneNotSupportedException {
         if(results.size() == 0) {
             System.out.println("结果集为空!");
             System.out.println("- - - - - - - - - - - - - - - - - - - - - - - -"
@@ -402,7 +413,8 @@ public class PolynomialCaculator {
         System.out.println("清空结果集成功!");
     }
 
-    public static void assignnValue(){
+    /* 多项式赋值 */
+    public static void assignnValueToPolynomial(){
         if(results.size() == 0) {
             System.out.println("结果集为空!");
             return;
@@ -434,30 +446,44 @@ public class PolynomialCaculator {
         System.out.printf("多项式赋值结果为：%f\n",poly.getResult());
     }
 
-    public static void main(String[] args) throws CloneNotSupportedException {
-        PolynomialCaculator caculator = new PolynomialCaculator();
+    /* 多项式计算器的控制台 */
+    public static void console() throws CloneNotSupportedException {
+        PolynomialCalculator calculator = new PolynomialCalculator();
         while(true){
-            int option = caculator.mainMenu();
+            int option = 8;
+            try {
+                option = calculator.mainMenu();
+            }catch(InputMismatchException ex){
+                continue;
+            }
             switch(option){
-                case 0:
-                {
-                    System.out.println("感谢您的使用！");
-                    System.exit(0);
-                } break;
+                case 0: {
+                    System.out.println("已退出多项式计算器，感谢您的使用!");
+                    return;//返回
+                }
                 case 1: viewExistingPoly(); break; //查看现有多项式
-                case 2: directCaculate(); break; //使用现有多项式进行运算
-                case 3: importPoly(); break; //导入多项式
-                case 4: {
+                case 2: directCalculate(); break; //使用现有多项式进行运算
+                case 3: {
                     int flag = 1;
                     while(flag != 0){
-                        flag = menu();
-                        caculate(flag);
+                        try {
+                            flag = menu();
+                        }catch(Exception e){
+                            continue;
+                        }
+                        try{
+                            calculate(flag);
+                        }catch (Exception e) {
+                            System.out.println("出现错误，程序将回到主菜单！");
+                            break;
+                        }
                     }
                     break;
                 }//输入多项式进行运算
+                case 4: importPolyFromResults(); break; //从保存的计算结果中导入多项式
                 case 5: viewResult(); break;//查看结果集
                 case 6: clearResults(); break;//清空结果集
-                case 7: assignnValue(); break;//多项式赋值
+                case 7: assignnValueToPolynomial(); break;//多项式赋值
                 default: System.out.println("选项输入错误，请重新输入"); break;
             }
             if(option != 3){
@@ -465,6 +491,11 @@ public class PolynomialCaculator {
                         + " - - - - - - - - - - - - - - - - - - - - - - - - ");
             }
         }
+    }
+
+    /* 多项式计算器启动 */
+    public static void main(String[] args) throws CloneNotSupportedException {
+        console();
     }
 
 }
