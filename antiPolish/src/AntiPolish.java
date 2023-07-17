@@ -2996,7 +2996,6 @@ public class AntiPolish {
         try {
             result = antiPolishEvaluate(postfixNotation);
         }catch(Exception ex){
-            ex.printStackTrace();
             System.out.println("您所输入的计算表达式\"" + expression + "\"无法计算！");
             return;
         }
