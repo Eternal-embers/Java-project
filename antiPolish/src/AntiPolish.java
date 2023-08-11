@@ -9,28 +9,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static java.lang.System.exit;
-import static java.lang.System.in;
 
 
 public class AntiPolish {
-    /*
-        变量集从A~Z
-        static char[] varSet_AZ = {
-            'A','B','C','D','E','F','G','H','I','J','K','L','M',
-            'N','O','P','Q','R','S','T','U','V','W','X','Y','Z'
-        };
-
-        变量集从a~z
-        static char[] varSet_az = {
-            'a','b','c','d','e','f','g','h','i','j','k','l','m',
-            'n','o','p','q','r','s','t','u','v','w','x','y','z'
-        };
-    */
     static Object[] varSet_az_value = new Object[26];//索引index处的值表示变量('a'+index)的值
     static Object[] varSet_AZ_value = new Object[26];//索引index处的值表示变量('A'+index)的值
     static boolean ifShowAntiPolish = true;//是否显示转换得到的逆波兰表达式
     static boolean ifShowProcess = true;//是否显示每一步计算过程
-    static boolean ifShowMenu = false;//是否显示菜单
+    static boolean ifShowMenu = true;//是否显示菜单
     static String inputAnchor = "$";//输入锚，用户输入时，位于最前面的提示输入的标志
     static File data = new File("data");
     static File configPath = new File("data//config.txt");
@@ -51,9 +37,9 @@ public class AntiPolish {
         /* 检查存储使用记录的文件是否存在 */
         if(!data.exists()){
             try{
-                if(!data.createNewFile())
+                if(!data.mkdir())
                     System.out.println("创建数据文件夹\"" + data.getAbsolutePath() + "\"失败！");
-            }catch (IOException e) {
+            }catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -192,7 +178,7 @@ public class AntiPolish {
         String value = null;
         boolean flag = false;
         while(true){
-            System.out.println("+ ————————————————————————————————————————————————————————————配置信息———————————————————————————————————————————————————————————— +");
+            System.out.println("+ —————————————————————————————————————————配置信息————————————————————————————————————————— +");
             System.out.printf(" %-100s \n", "[1]是否显示计算过程(true/false)        ifShowProcess = " + ifShowProcess);
             System.out.printf(" %-100s \n", "[2]是否显示逆波兰表达式(true/false)     ifShowAntiPolish  = " + ifShowAntiPolish);
             System.out.printf(" %-100s \n", "[3]是否显示菜单(true/false)           ifShowMenu = " + ifShowMenu);
@@ -203,7 +189,7 @@ public class AntiPolish {
             System.out.printf(" %-100s \n", "[8]默认变量集读取路径(文件路径)          defaultReadPath = " + defaultReadPath.getAbsolutePath());
             System.out.printf(" %-100s \n", "[9]默认变量集保存路径(文件路径)          defaultSavePath = " + defaultSavePath.getAbsolutePath());
             System.out.printf(" %-100s \n", "[10]小数转分式中的最大分母(整数)          maxDenominator = " + maxDenominator);
-            System.out.println("+ —————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— +");
+            System.out.println("+ ————————————————————————————————————————————————————————————————————————————————————————— +");
             System.out.print("请输入需要修改的配置项的配置序号(输入0退出)：");
             try {
                 option = input.nextLine();
@@ -376,9 +362,11 @@ public class AntiPolish {
                 System.out.printf(ch + "不属于变量名，已自动跳过该字符");
         }
         if(removed.size() != 0){
+            int size = removed.size();
             System.out.print("程序已将变量");
-            for(Object var: removed)
-                System.out.print("'" + var + "'、");
+            for(int i = 0;i < size - 1;i++)
+                System.out.print("'" + removed.get(i) + "'、");
+            System.out.print("'" + removed.get(size - 1));//最后一个变量后面不加‘、’
             System.out.println("移除");
             logging(removed.size() + "个变量\"" + listToString(removed) + "\"被移除");
         }
@@ -445,10 +433,14 @@ public class AntiPolish {
             System.out.println("路径\"" + path + "\"不存在，是否新建该文件？(是/否)");
             System.out.print(inputAnchor);
             String option = scanner.nextLine();
-            if(option.contains("是") || option.compareTo("")==0) {
+            if(option.contains("是")) {
                 File file = new File(path);
                 if (!file.createNewFile())//创建该文件
                     System.out.println("创建文件\"" + file.getAbsolutePath() + "\"失败！");
+                return null;
+            }
+            else if(option.compareTo("")==0){
+                System.out.println("已取消读取变量");
                 return null;
             }
             else{
@@ -617,7 +609,7 @@ public class AntiPolish {
             case "+", "-" -> 1;
             case "*", "/", "%" -> 2;
             case "^" -> 3;
-            case "!", "！" -> 4;
+            case "!", "！","~" -> 4;
             case "(", ")", "（", "）", "[", "]" -> 5;
             default -> 5;
         };
@@ -642,7 +634,7 @@ public class AntiPolish {
         command = command.replaceAll("\\d","");//移除command中的所有数字
         command = command.replace(".","");//移除小数点
         command = command.toLowerCase();//将command转换的字母全部转为小写
-        String[] tokens = command.split("[?？+\\-*/%^!！()（）\\[\\]]");//以+-*/%^!！()（）[]这些符号分割字符串
+        String[] tokens = command.split("[?？+\\-*/%^!！~()（）\\[\\]]");//以+-*/%^!！()（）[]这些符号分割字符串
         for(String token:tokens){
             if(token.isEmpty()) continue;
             //如果token全部由小写字母组成
@@ -663,7 +655,7 @@ public class AntiPolish {
     /* 判断一个字符是否是运算符 */
     static boolean isOperator(char ch){
         char[] operators = {
-                '?','？','+','-','*','/','%','^','!', '！','(',')','（','）','[',']'
+                '?','？','+','-','*','/','%','^','!', '！','~','(',')','（','）','[',']'
         };
         for (char operator : operators) if (ch == operator) return true;
         return false;
@@ -690,7 +682,7 @@ public class AntiPolish {
         else if(obj instanceof String)
             n = Integer.parseInt((String) obj);
         for(int i = 1; i <= n; i++){
-             res *= i;
+            res *= i;
         }
         return res;
     }
@@ -957,7 +949,7 @@ public class AntiPolish {
         }
 
         coef = num / PI;
-        int integerPart = (int)Math.floor(coef);//向下取整，整数部分
+        int integerPart = (int)Math.floor(coef);//向下取整，整数部分anti
         double fractionalPart = coef - integerPart;//小数部分
 
         //正数
@@ -1270,7 +1262,7 @@ public class AntiPolish {
                         flag = 4;
 
                     if (func5 != null && ( func5.equals("arcsin") || func5.equals("arccos") || func5.equals("arctan")
-                             || func5.equals("factor") ))
+                            || func5.equals("factor") ))
                         flag = 5;
 
                     if (flag != 0) {
@@ -1322,7 +1314,7 @@ public class AntiPolish {
                 else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'))
                     postfixNotation.add(ch);
 
-                    /* 如果是数字 */
+                /* 如果是数字 */
                 else if (ch >= '0' && ch <= '9') {
                     int j = i;
                     char num;
@@ -2450,7 +2442,7 @@ public class AntiPolish {
                             Object var = varTrack.pop();//追踪
 
                             /* value的取值范围是[0,∞) */
-                            int x = 0;
+                            int x;
                             if (value instanceof Double) {
                                 System.out.println(value + "为小数，程序将自动对其向下取整再判断它是否是整数");
                                 x = (int) ((double) ((Double) value));
@@ -2610,7 +2602,7 @@ public class AntiPolish {
                             Object value = list.pop();//获取计算值
                             Object var = varTrack.pop();//追踪
 
-                            int x = 0;
+                            int x;
                             if (value instanceof Double) {
                                 System.out.println(value + "为小数，程序将把" + value + "向下取整再进行素因子分解");
                                 x = floor(value);
@@ -2685,7 +2677,7 @@ public class AntiPolish {
                             }
                             list.push(fact(value));//push计算结果
                             varTrack.push(fact(value));//跟踪
-                            /* 输入计算过程 */
+                            /* 输出计算过程 */
                             if (ifShowProcess) {
                                 if (var instanceof Character) {
                                     System.out.println(var + "(" + value + ")" + ch + " = " + list.peek());
@@ -2709,9 +2701,30 @@ public class AntiPolish {
                                     logging(value + "" + ch + " = " + list.peek());
                                 }
                             }
-                        } else {
+                        }
+                        /* 如果为负号，~表示负号 */
+                        else if(ch == '~'){
+                            Object value = list.pop();//获取计算值
+                            Object var = varTrack.pop();//追踪
+                            Integer intValue = null;
+                            Double doubleValue = null;
+                            if(value instanceof Integer)
+                                intValue = (Integer) value;
+                            else
+                                doubleValue = (Double) value;
+                            if(intValue != null) {
+                                list.push(-intValue);//push计算结果
+                                varTrack.push(-intValue);//跟踪
+                            }
+                            else {
+                                list.push(-doubleValue);//push计算结果
+                                varTrack.push(-doubleValue);//跟踪
+                            }
+                        }
+                        /* 处理出现的负数，当减号单独使用时表示负数 */
+                        else {
                             int flag = 0;//用于判断value1和value2的类型
-                            Object value1, value2;
+                            Object value1, value2 = null;
                             Object obj1, obj2;
                             value1 = list.pop();//权值1，Integer为1，Double为0
                             obj1 = varTrack.pop();//跟踪
@@ -2719,8 +2732,8 @@ public class AntiPolish {
                                 value2 = list.pop();//权值2，Integer为1，Double为0
                                 obj2 = varTrack.pop();//跟踪
                             } else {
-                                value2 = 0;//这里实现当只出现一个负号时可以表示为负数
-                                obj2 = 0;//跟踪
+                                System.out.println("警告：此处\'" + ch +"\'运算无法取得足够参数！仅有一个参数[" + value1 +"]无法通过\'" + ch +"\'进行运算");
+                                continue;//此时无法取得足够参数，跳过计算，继续获取参数
                             }
                             if (value1 instanceof Integer)
                                 flag += 1;
@@ -2804,7 +2817,7 @@ public class AntiPolish {
                                 }
                                 case '/': {
                                     /* 当除数为0 */
-                                    if ((value1 instanceof Integer ? (Integer) value1 : (Double) value1) < 0) {
+                                    if (abs(value1) < 1e-6) {
                                         System.out.println("除数不能为0！在\"" + value2 + " / " + value1 + "\"的计算中除数为0.");
                                         return null;
                                     }
@@ -2877,7 +2890,7 @@ public class AntiPolish {
                                 }
                             }
                             varTrack.push(list.peek());//跟踪每一步计算求得的值
-                            /* 输入计算过程 */
+                            /* 输出计算过程 */
                             if (ifShowProcess) {
                                 int status = 0;
                                 if (obj1 instanceof Character) status += 1;//权值1
@@ -3052,6 +3065,30 @@ public class AntiPolish {
         System.out.println("arccos  反三角余弦函数,定义域(-∞,∞)，值域(-π/2,π/2)");
         System.out.println("arctan  反三角正切函数,定义域{x|x!= π/2 + kπ,k可取所有整数}，值域(-∞,∞)");
         System.out.println("factor  素因子分解，将一个数分解成多个素数的乘积,例如factor (72) = (2^3) * (3^2),factor只能单独使用");
+        System.out.println("""
+                sh、ch、th、lg、ln、sin、cos、tan、sec、csc、cot、abs、exp、pify、frac、sqrt、arsh、arch、arth、ceil、floor、
+                round、prime、arcos、arctan、facrot(即除gcd、lcm以外的全部函数)这些函数的使用方式都是："函数名 参数"的形式，只需要在函数名后面跟一个属于它的参数即可，
+                中间的空格可以取消，例如：arctan1、lg100、pify20等等。使用案例：
+                求以10为底，100的对数：lg 100  计算结果：2
+                求以e为底，e平方的对数：ln (Eu ^ 2) 或者 ln(Eu * Eu)  计算结果：2
+                求根号10：sqrt 10  计算结果：3.1622776601683795
+                判断247是否是素数：prime 247  计算结果：false
+                求π/6的正弦值：sin(PI/6)  计算结果：0.49999999999999994
+                求-3.5的绝对值：abs(-3.5)  计算结果：3.5
+                将247进行素因子分解：factor 247  计算结果：13 * 19
+                将0.4166666666666667转换为分式：frac 0.4166666666666667  计算结果：5/12
+                将1.3089969389957472转换为带π的分式：pify 1.3089969389957472  计算结果：(5/12)π
+                在全部的函数中，只有gcd和lcm为二元函数，它们的使用方式是："参数1 函数名 参数2",空格同样可以忽略，使用案例：
+                求72与36的最大公约数：108 gcd 60或者60 gcd 108  计算结果：12
+                求120与24的最小公倍数：35 lcm 28或者28 lcm 35  计算结果：140
+                所有函数中，prime、pify、frac、factor这些函数的使用有限制，由于它们的计算结果不能继续参与运算，所有它们一般单独使用或者
+                在计算式的最后调用，例如：
+                单独使用：prime 247、pify Eu、frac 2.75、factor 284
+                在计算式的最后调用：
+                prime(23 * 7 + lg 100)  计算结果：true
+                pify(arcsin(sqrt(3) / 2))  计算结果：(1/3)π
+                factor(12 * 7 + 4 ^ 5 - round(Eu * PI))  计算结果：7 * 157
+                """);
     }
 
     static void help(){
@@ -3123,7 +3160,7 @@ public class AntiPolish {
         System.out.println("""
                 函数    函数的基本使用方法：函数名 参数
                        除()、（）、[]外，函数的优先级是最高的，所有函数拥有相同的优先级。
-                       函数自动从其右边获取参数，lg 2 + 5中2即为lg的参数
+                       绝大多数函数自动从其右边获取参数，例如lg 2 + 5中2即为lg的参数
                        或者你可以将一个式子作为函数的参数：lg (10 * 10) + 5中(10 * 10)即lg的参数
                        可以通过函数的嵌套将函数的结果作为另一个函数的参数，例如lg[ln(4 * 23)]中ln(4 * 23)为lg的参数
                        一般需要用函数的参数用括号例如()、（）、[]括起来，如果不加括号函数只把它右边的一个值作为参数
@@ -3131,8 +3168,47 @@ public class AntiPolish {
                        lg(100 + 10)，括号可以使用中英文括号或方括号。
                 """);
         System.out.println("文件信息  程序所有产生的数据文件都在\"" + new File("data").getAbsolutePath() + "\"文件夹中\n" +
-        "        在\"" + logPath.getAbsolutePath() + "\"可以查看您的所有使用日志。\n");
+                "        在\"" + logPath.getAbsolutePath() + "\"可以查看您的所有使用日志。\n");
         System.out.println("==========================================================================================================");
+    }
+
+    static void usage(String key){
+        if(key.equals("+")){
+            System.out.println("""
+                    '+'为加法运算符，使用格式：参数1 + 参数2
+                    用例：9 + 4        计算结果：13
+                    """);
+        }
+        else if(key.equals("-")) {
+            System.out.println("""
+                    '-'为减法运算符，使用格式：参数1 - 参数2
+                    用例：9 - 4        计算结果：5
+                    """);
+        }
+        else if(key.equals("*")){
+            System.out.println("""
+                    '*'为乘法运算符，使用格式：参数1 * 参数2
+                    用例：3 * 3        计算结果：9      
+                    """);
+        }
+        else if(key.equals("/")){
+            System.out.println("""
+                    '/'为除法运算符，使用格式：参数1 / 参数2
+                    这里的'/'与数学上的除法有些不同：
+                    1.当参数1和参数2都为整数时，进行的是带余除法
+                    例如：7 / 3        计算结果：2
+                         -12 / 5      计算结果：-2
+                         1 / 5        计算结果：0
+                    """);
+        }
+        else if(key.equals("?")) {
+            System.out.println("""
+                    '?'为比较大小的运算符，使用格式：参数1 ？ 参数2,得到参数1和参数2之间的最大值
+                    用例：5。0/12 ？ 0.5  计算结果：0.5
+                         Eu ？ 2.7      计算结果：2.718281828459045
+                         lg100 ? 2      计算结果：2
+                    """);
+        }
     }
 
     static void console() throws IOException {
@@ -3153,6 +3229,7 @@ public class AntiPolish {
                 System.out.println("多项式计算器 - - - - - - - - - - - - -poly");
                 System.out.println("帮助 - - - - - - - - - - - - - - - -help");
                 System.out.println("修改配置信息 - - - - - - - - - - - - -config");
+                System.out.println("获取使用方法 - - - - - - - - - - - - -usage [key]");
                 System.out.println("注：所有命令不限制字母的大小写");
             }
             System.out.print(inputAnchor);
@@ -3160,6 +3237,11 @@ public class AntiPolish {
             command = userInput.nextLine();
             expression = command;//如果输入的是计算表达式那么保留原始输入的字符串
             command = command.toLowerCase();//命令不限大小写
+            if(command.contains("usage")){
+                String key = command.replace("usage","");
+                usage(key);
+                continue;//跳过后面内容，进行下一次命令输入
+            }
             option = switch (command) {
                 case "exit" -> 0;
                 case "adcg" -> 1;
