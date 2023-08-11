@@ -619,7 +619,7 @@ public class AntiPolish {
         String[] functions = {
                 "lg","ln","sh","ch","th",
                 "sin","cos","tan","abs","exp","gcd","lcm","sec","csc","cot",
-                "arsh","arch","arth","pify","frac","sqrt","ceil",
+                "arsh","arch","arth","pify","frac","sqrt","ceil","comb","perm",
                 "floor","round","prime",
                 "arcsin","arccos","arctan","factor"
         };
@@ -926,7 +926,67 @@ public class AntiPolish {
         return (x * y) / gcd;
     }//lcm
 
-    /*  pify    将一个数转为以π为因子的式子,例如pify(1.75*π) = π + (3/4)*π  */
+    static int A(int n,int m){
+        if (n < m) {
+            return -1;//n必须大于等于m时才能计算排列数A(n,m)
+        }
+        if (n == 0 || m == 0)
+                return 1;
+        return n * A(n - 1, m - 1);
+    }
+
+    /* perm  计算排列数,perm(n,m)计算n个元素中任取m个元素的所有排列的个数 */
+    static int perm(Object obj1,Object obj2){
+        int n = 0,m = 0;
+
+        if(obj1 instanceof Double)
+            n = (int)((double)((Double)obj1));
+        else if(obj1 instanceof Integer)
+            n = (Integer)obj1;
+        else if(obj1 instanceof String)
+            n = Integer.parseInt((String) obj1);
+
+        if(obj2 instanceof Double)
+            m = (int)((double)((Double)obj1));
+        else if(obj2 instanceof Integer)
+            m = (Integer)obj2;
+        else if(obj2 instanceof String)
+            m = Integer.parseInt((String) obj2);
+
+        return A(n,m);
+    }//comb
+
+    static int C(int n,int m){
+        if (m == 0 || m == n) {
+            return 1;
+        } else {
+            return C(n - 1, m - 1) + C(n - 1, m);
+        }
+    }
+
+    /* comb  计算组合数,comb(n,m)计算从n个不同的元素中任取m个元素的并排成一组的所有组合的个数 */
+    static int comb(Object obj1,Object obj2){
+        int n = 0,m = 0;
+
+        if(obj1 instanceof Double)
+            n = (int)((double)((Double)obj1));
+        else if(obj1 instanceof Integer)
+            n = (Integer)obj1;
+        else if(obj1 instanceof String)
+            n = Integer.parseInt((String) obj1);
+
+        if(obj2 instanceof Double)
+            m = (int)((double)((Double)obj1));
+        else if(obj2 instanceof Integer)
+            m = (Integer)obj2;
+        else if(obj2 instanceof String)
+            m = Integer.parseInt((String) obj2);
+
+        return C(n,m);
+    }//comb
+
+
+    /*  pify   将一个数转为以π为因子的式子,例如pify(1.75*π) = π + (3/4)*π  */
     static String pify(Object obj){
         boolean ifPositive = true;//是否是正数
         double num = 0;//传入的参数的值
@@ -1255,7 +1315,7 @@ public class AntiPolish {
 
                     if (func3 != null && ( func3.equals("pify") || func3.equals("frac") || func3.equals("sqrt")
                             || func3.equals("arsh") || func3.equals("arch") || func3.equals("arth")
-                            || func3.equals("ceil") ))
+                            || func3.equals("ceil") || func3.equals("comb") || func3.equals("perm")))
                         flag = 3;
 
                     if(func4 != null && ( func4.equals("floor") || func4.equals("round") || func4.equals("prime") ))
@@ -2073,6 +2133,90 @@ public class AntiPolish {
                                 }
                             }//ifShowProcess
                         }//lcm
+
+                        /* comb */
+                        else if (obj.equals("perm")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value1 = list.pop();//获取计算值
+                            Object var1 = varTrack.pop();//追踪
+                            Object value2 = list.pop();//获取计算值
+                            Object var2 = varTrack.pop();//追踪
+                            list.push(perm(value2, value1));//push计算结果
+                            varTrack.push(list.peek());//跟踪
+
+                            if(ifShowProcess) {
+                                /* 输出计算结果 */
+                                int flag = 0;
+                                if (var1 instanceof Character) flag += 1;//权重为1
+                                if (var2 instanceof Character) flag += 2;//权重为2
+                                int y = value1 instanceof Integer ? (Integer) value1 : (int) ((double) ((Double) value1));
+                                int x = value2 instanceof Integer ? (Integer) value2 : (int) ((double) ((Double) value2));
+                                switch (flag) {
+                                    case 0: {
+                                        System.out.println("perm(" + x + ","+ y + ") = " + list.peek());
+                                        logging("perm(" + x + ","+ y + ") = " + list.peek());
+                                        break;
+                                    }
+                                    case 1: {
+                                        System.out.println("perm(" + var2 + "(" + x + ")," + y + ") = " + list.peek());
+                                        logging("perm(" + var2 + "(" + x + ")," + y + ") = " + list.peek());
+                                        break;
+                                    }
+                                    case 2: {
+                                        System.out.println("perm(" + x + "," + var1 + "（" + y + ")) = " + list.peek());
+                                        logging("perm(" + x + "," + var1 + "（" + y + ")) = " + list.peek());
+                                        break;
+                                    }
+                                    case 3: {
+                                        System.out.println("perm(" + var2 + "(" + x + ")," + var1 + "（" + y + ")) = " + list.peek());
+                                        logging("perm(" + var2 + "(" + x + ")," + var1 + "（" + y + ")) = " + list.peek());
+                                        break;
+                                    }
+                                }
+                            }//ifShowProcess
+                        }//perm
+
+                        /* comb */
+                        else if (obj.equals("comb")) {
+                            /* 获取计算值和函数的参数对象 */
+                            Object value1 = list.pop();//获取计算值
+                            Object var1 = varTrack.pop();//追踪
+                            Object value2 = list.pop();//获取计算值
+                            Object var2 = varTrack.pop();//追踪
+                            list.push(comb(value2, value1));//push计算结果
+                            varTrack.push(list.peek());//跟踪
+
+                            if(ifShowProcess) {
+                                /* 输出计算结果 */
+                                int flag = 0;
+                                if (var1 instanceof Character) flag += 1;//权重为1
+                                if (var2 instanceof Character) flag += 2;//权重为2
+                                int y = value1 instanceof Integer ? (Integer) value1 : (int) ((double) ((Double) value1));
+                                int x = value2 instanceof Integer ? (Integer) value2 : (int) ((double) ((Double) value2));
+                                switch (flag) {
+                                    case 0: {
+                                        System.out.println("comb(" + x + ","+ y + ") = " + list.peek());
+                                        logging("comb(" + x + ","+ y + ") = " + list.peek());
+                                        break;
+                                    }
+                                    case 1: {
+                                        System.out.println("comb(" + var2 + "(" + x + ")," + y + ") = " + list.peek());
+                                        logging("comb(" + var2 + "(" + x + ")," + y + ") = " + list.peek());
+                                        break;
+                                    }
+                                    case 2: {
+                                        System.out.println("comb(" + x + "," + var1 + "（" + y + ")) = " + list.peek());
+                                        logging("comb(" + x + "," + var1 + "（" + y + ")) = " + list.peek());
+                                        break;
+                                    }
+                                    case 3: {
+                                        System.out.println("comb(" + var2 + "(" + x + ")," + var1 + "（" + y + ")) = " + list.peek());
+                                        logging("comb(" + var2 + "(" + x + ")," + var1 + "（" + y + ")) = " + list.peek());
+                                        break;
+                                    }
+                                }
+                            }//ifShowProcess
+                        }//comb
 
                         /* pify,将值转换成以PI为因子的式子，pify只能在最后处理结果时使用 */
                         else if (obj.equals("pify")) {
@@ -3051,6 +3195,8 @@ public class AntiPolish {
         System.out.println("exp     计算e的x次方，exp(x) = e ^ x,定义域(-∞,∞)，值域(0,∞)");
         System.out.println("gcd     求两个数的最大公约数,如果参数为小数，那么将自动将该参数向下取整再进行计算");
         System.out.println("lcm     求两个数的最小公倍数,如果参数为小数，那么将自动将该参数向下取整再进行计算");
+        System.out.println("perm    计算排列数,perm(n,m)计算从n个元素中任取m个元素的所有排列的个数");
+        System.out.println("comb    计算组合数,comb(n,m)计算从n个不同的元素中任取m个元素的并排成一组的所有组合的个数");
         System.out.println("pify    将一个数转为以π为因子的式子,例如pify(1.75*π) = π + (3/4)*π,pify只能单独使用");
         System.out.println("frac    将一个数转换成分式，例如frac(3.75) = 15/4,frac(0.4166666666) = 5/12,frac只能单独使用");
         System.out.println("sqrt    sqrt x = x ^ 0.5,计算正平方根,例如sqrt(36) = 6");
@@ -3066,35 +3212,52 @@ public class AntiPolish {
         System.out.println("arctan  反三角正切函数,定义域{x|x!= π/2 + kπ,k可取所有整数}，值域(-∞,∞)");
         System.out.println("factor  素因子分解，将一个数分解成多个素数的乘积,例如factor (72) = (2^3) * (3^2),factor只能单独使用");
         System.out.println("""
-                sh、ch、th、lg、ln、sin、cos、tan、sec、csc、cot、abs、exp、pify、frac、sqrt、arsh、arch、arth、ceil、floor、
-                round、prime、arcos、arctan、facrot(即除gcd、lcm以外的全部函数)这些函数的使用方式都是："函数名 参数"的形式，只需要在函数名后面跟一个属于它的参数即可，
-                中间的空格可以取消，例如：arctan1、lg100、pify20等等。使用案例：
-                求以10为底，100的对数：lg 100  计算结果：2
-                求以e为底，e平方的对数：ln (Eu ^ 2) 或者 ln(Eu * Eu)  计算结果：2
-                求根号10：sqrt 10  计算结果：3.1622776601683795
-                判断247是否是素数：prime 247  计算结果：false
-                求π/6的正弦值：sin(PI/6)  计算结果：0.49999999999999994
-                求-3.5的绝对值：abs(-3.5)  计算结果：3.5
-                将247进行素因子分解：factor 247  计算结果：13 * 19
-                将0.4166666666666667转换为分式：frac 0.4166666666666667  计算结果：5/12
-                将1.3089969389957472转换为带π的分式：pify 1.3089969389957472  计算结果：(5/12)π
-                在全部的函数中，只有gcd和lcm为二元函数，它们的使用方式是："参数1 函数名 参数2",空格同样可以忽略，使用案例：
-                求72与36的最大公约数：108 gcd 60或者60 gcd 108  计算结果：12
-                求120与24的最小公倍数：35 lcm 28或者28 lcm 35  计算结果：140
-                所有函数中，prime、pify、frac、factor这些函数的使用有限制，由于它们的计算结果不能继续参与运算，所有它们一般单独使用或者
-                在计算式的最后调用，例如：
-                单独使用：prime 247、pify Eu、frac 2.75、factor 284
-                在计算式的最后调用：
-                prime(23 * 7 + lg 100)  计算结果：true
-                pify(arcsin(sqrt(3) / 2))  计算结果：(1/3)π
-                factor(12 * 7 + 4 ^ 5 - round(Eu * PI))  计算结果：7 * 157
+                
+                除gcd、lcm以外的全部函数的使用格式：函数名 参数
+                只需要在函数名后面跟一个属于它的参数即可，中间的空格可以忽略，例如：arctan1、pify20等等。
+                使用案例：
+                求以10为底，100的对数：
+                    lg 100                 计算结果：2
+                求以e为底，e平方的对数：
+                ln (Eu ^ 2)、ln(Eu * Eu)    计算结果：2
+                求根号10：
+                    sqrt 10                 计算结果：3.1622776601683795
+                判断247是否是素数：
+                    prime 247               计算结果：false
+                求π/6的正弦值：
+                    sin(PI/6)               计算结果：0.49999999999999994
+                求-3.5的绝对值：
+                    abs(-3.5)               计算结果：3.5
+                将247进行素因子分解：
+                    factor 247              计算结果：13 * 19
+                将0.4166666666666667转换为分式：
+                    frac 0.4166666666666667  计算结果：5/12
+                将1.3089969389957472转换为带π的分式：
+                    pify 1.3089969389957472  计算结果：(5/12)π
+                
+                在全部的函数中，只有gcd和lcm为二元函数，它们的使用方式是：参数1 函数名 参数2,空格同样可以忽略。
+                使用案例：
+                求72与36的最大公约数：
+                    108 gcd 60、60 gcd 108   计算结果：12
+                求120与24的最小公倍数：
+                    35 lcm 28、28 lcm 35     计算结果：140
+                
+                所有函数中，prime、pify、frac、factor这些函数的使用有限制，由于它们的计算结果不能继续参与运算，
+                所以它们一般单独使用或者在计算式的最后调用，
+                使用案例：
+                1.单独使用：
+                    prime 247、pify Eu、frac 2.75、factor 284
+                2.在计算式的最后调用：
+                    prime(23 * 7 + lg 100)                  计算结果：true
+                    pify(arcsin(sqrt(3) / 2))               计算结果：(1/3)π
+                    factor(12 * 7 + 4 ^ 5 - round(Eu * PI)) 计算结果：7 * 157
                 """);
     }
 
-    static void help(){
+    static void help() {
         System.out.println("                                     逆波计算器的使用说明");
         System.out.println("==========================================================================================================");
-        System.out.println("计算器通过输入命令调用不同的功能，共有11个命令：exit、adcg、read、save、var、antipo、ls、func、poly、help、config、");
+        System.out.println("计算器通过输入命令调用不同的功能，共有12个命令：exit、adcg、read、save、var、antipo、ls、func、poly、help、config、usage");
         System.out.println("exit    退出程序");
         System.out.println("""
                 adcg    添加或设置变量，变量名只能是大小写字母，变量未赋值时初始为null，程序根据你提交的变量集对对应的变量进行赋值
@@ -3115,35 +3278,38 @@ public class AntiPolish {
         System.out.println("""
                 antipo  输入计算表达式进行计算，程序将会给出它的每一步计算过程以及计算结果
                         程序计算支持下列运算符：{
-                             比较大小(?/？), 加法+, 减法-, 乘法*, 除法/, 取余运算%, 幂运算^,阶乘运算(!/！)
+                             比较大小(?/？), 加法+, 减法-, 乘法*, 除法/, 取余运算%, 幂运算^,阶乘运算(!/！)、负号~
                         }
                         同时支持下列函数运算符：{
                              以10为底的对数lg, 以e为底的对数ln, 双曲正弦函数sh, 双曲余弦函数ch, 双曲正切th
                              三角正弦函数sin, 三角余弦函数cos, 三角正切函数tan, 正割函数sec, 余割函数csc, 余切函数cot、
                              取绝对值abs, 计算e的x次方exp, 求最大公约数gcd, 求最小公倍数lcm,
+                             计算排列数A(n,m)perm，计算组合数C(n,m)comb,
                              将一个数转为以π为因子的式子pify, 将一个数转为分式frac, 正平方根sqrt,
                              反双曲正弦函数arsh, 反双曲余弦函数arch, 反双曲正切函数arth,
                              向上取整ceil, 向下取整floor, 四舍五入round, 判断素数prime,
-                             反三角正弦函数arcsin, 反三角余弦函数arccos, 反三角正切函数arctan
+                             反三角正弦函数arcsin, 反三角余弦函数arccos, 反三角正切函数arctan,素因子分解factor
                         }
                         对于sin、cos、tan等等这些函数运算符，不限制大小写，程序会自动将字母统一转换成小写再处理
-                        运算优先级：{? ？} < {+ -} < {* / %} < {^} < {!} = {所有函数运算符}
+                        运算优先级：{? ？} < {+ -} < {* / %} < {^} < {!} = {~} = {所有函数运算符}
                         计算支持两大常数：圆周率π用PI表示、自然常数e用Eu表示
                         支持使用中英文圆括号()/（）、方括号[]、来改变运算顺序，注意中英文括号可以混合使用，例如可以左边为中文括号右边为英文括号。
                 """);
         System.out.println("""
-                ls      列出所有之前输入的计算表达式，以时间+计算表达式的形式呈现，例如：
-                        11:14:38   sin PI + cos PI
-                        11:15:59   sin(PI / 2 + 3.5 * PI) + cos(PI - 0.25 * PI)
+                ls  列出所有之前输入的计算表达式，以时间+计算表达式的形式呈现，例如：
+                    11:14:38   sin PI + cos PI
+                    11:15:59   sin(PI / 2 + 3.5 * PI) + cos(PI - 0.25 * PI)
                 """);
-        System.out.println("func     查看所有函数的详细信息");
-        System.out.println("poly     使用多项式计算器，支持多项式的加、减、乘、幂运算");
-        System.out.println("help     查看帮助信息");
-        System.out.println("config   修改配置信息");
+        System.out.println("func        查看所有函数的详细信息");
+        System.out.println("poly        使用多项式计算器，支持多项式的加、减、乘、幂运算");
+        System.out.println("help        查看帮助信息");
+        System.out.println("config      修改配置信息");
+        System.out.println("usage [key] 显示关键词key的相关用法和信息");
         System.out.println("==========================================================================================================");
-        System.out.println("快捷计算   当你输入的命令是一条计算表达式且其中不存在变量时，程序会自动将其识别出并计算该计算表达式");
+        System.out.println("快捷计算      当你输入的命令是一条计算表达式且其中不存在变量时，程序会自动将其识别出并计算该计算表达式");
         System.out.println("""
                 运算符   中英文问号(?,？)可以比较两个数的大小，x ? y得到x、y之间的最大值,例如ln(10 ? 20)得到的是ln 20
+                        负号~，负号拥有最高优先级，当负号出现在参数前时表示对该数取反
                         除问号外，加法+, 减法-, 乘法*, 除法/, 取余运算%, 幂运算^,阶乘运算(!/！)这些运算符的使用方法与其在数学中的使用方法相同。
                 """);
         System.out.println("""
@@ -3169,46 +3335,228 @@ public class AntiPolish {
                 """);
         System.out.println("文件信息  程序所有产生的数据文件都在\"" + new File("data").getAbsolutePath() + "\"文件夹中\n" +
                 "        在\"" + logPath.getAbsolutePath() + "\"可以查看您的所有使用日志。\n");
-        System.out.println("==========================================================================================================");
     }
 
     static void usage(String key){
-        if(key.equals("+")){
+        if(key.contains("变量") || key.contains("var")){
+            System.out.println("""
+                    变量由大小写字母表示，每一个字母都可以作为一个变量使用
+                    已经进行赋值的变量可以像普通的数一样在计算式中使用，进行运算时将自动以它所在的值进行计算
+                    adcg 命令进行添加和修改变量，删除和修改时的输入格式：变量 = 值，#结束输入
+                    rm 命令进行删除变量，只需要输入变量名，#结束输入
+                    """);
+        }
+        if(key.contains("+")){
             System.out.println("""
                     '+'为加法运算符，使用格式：参数1 + 参数2
+                    运算优先权重：1
                     用例：9 + 4        计算结果：13
                     """);
         }
-        else if(key.equals("-")) {
+        if(key.contains("-")) {
             System.out.println("""
                     '-'为减法运算符，使用格式：参数1 - 参数2
+                    运算优先权重：1
                     用例：9 - 4        计算结果：5
                     """);
         }
-        else if(key.equals("*")){
+        if(key.contains("*")){
             System.out.println("""
                     '*'为乘法运算符，使用格式：参数1 * 参数2
-                    用例：3 * 3        计算结果：9      
+                    运算优先权重：2
+                    用例：
+                        3 * 3        计算结果：9      
                     """);
         }
-        else if(key.equals("/")){
+        if(key.contains("/")){
             System.out.println("""
                     '/'为除法运算符，使用格式：参数1 / 参数2
+                    运算优先权重：2
                     这里的'/'与数学上的除法有些不同：
                     1.当参数1和参数2都为整数时，进行的是带余除法
-                    例如：7 / 3        计算结果：2
-                         -12 / 5      计算结果：-2
-                         1 / 5        计算结果：0
+                    例如：
+                        7 / 3        计算结果：2
+                        ~12 / 5      计算结果：-2
+                        1 / 5        计算结果：0
+                        13 / ~9      计算结果：-1
+                    2.当参数1和参数2中存在小数时，进行的是数学上的除法
+                    例如：
+                        12.0 / 5     计算结果：2.4
+                        1. / 3        计算结果：0.3333333333333333   注：只要数字后面存在小数点，该数就会被识别为小数
+                        ~8 / 3.0      计算结果：-2.6666666666666665
+                        8.4 / 2.1     计算结果：4
                     """);
         }
-        else if(key.equals("?")) {
+        if(key.contains("?") || key.contains("？")) {
             System.out.println("""
-                    '?'为比较大小的运算符，使用格式：参数1 ？ 参数2,得到参数1和参数2之间的最大值
-                    用例：5。0/12 ？ 0.5  计算结果：0.5
-                         Eu ？ 2.7      计算结果：2.718281828459045
-                         lg100 ? 2      计算结果：2
+                    '?'和'？'均为比较大小的运算符，二者通用，使用格式：参数1 ? 参数2,结果将得到参数1和参数2之间的最大值
+                    运算优先权重：0
+                    用例：
+                        5。0/12 ？ 0.5  计算结果：0.5
+                        Eu ？ 2.7      计算结果：2.718281828459045
+                        lg100 ? 2      计算结果：2
                     """);
         }
+        if(key.contains("%")){
+            System.out.println("""
+                    '%'为取余运算符，使用格式：参数 1 % 参数2，参数1和参数2一般要求都为整数
+                    x/y=z·····r，其中r < y,|y| * |z| < |x|，且x=y*z+r，那么r为就是x取余y的结果：x % y = r
+                    运算优先权重：2
+                    用例：
+                        1 % 4           计算结果：1
+                        15 % 4          计算结果：3
+                        ~7 % 4          计算结果：-3
+                        ~12 % ~5        计算结果：-2
+                    如果参数1或参数2中出现了小数，由于小数无法取余，因此将进行除法运算
+                    用例：
+                        3.2 % 2          计算结果：1.6
+                        ~4.8 % ~5        计算结果：-0.96
+                    """);
+        }
+        if(key.contains("^")){
+            System.out.println("""
+                    ^为指数运算符，使用格式：x ^ u，结果得到x的u次方
+                    运算优先权重：3
+                    用例：
+                        3 ^ 0           计算结果：1
+                        2 ^ 3           计算结果：8
+                        27 ^ (1/3)      计算结果：3
+                        0.25 ^ 0.5      计算结果：0.5
+                    注意：当指数为小数时进行开根号运算时，进行幂运算的数不能为负数
+                    例如：~1 ^ 0.5将无法计算，会得到错误结果0
+                    """);
+        }
+        if(key.contains("!") || key.contains("！")){
+            System.out.println("""
+                    !或！均为阶乘运算符，使用格式：参数!，结果将得到参数的阶乘
+                    参数一般要求为大于0的整数，如果参数不为整数，程序将对其四舍五入后再进行运算
+                    用例：
+                        5！          计算结果：120
+                        3.5！        计算结果：24
+                    """);
+        }
+        if(key.contains("~")){
+            System.out.println("""
+                    ~为取反运算符，也就是数学里的负号，使用格式：~参数
+                    用例：
+                        ~2          计算结果：-2
+                        ~（~1）      计算结果：1
+                    """);
+        }
+        if(key.contains("函数") || key.contains("func")){
+            System.out.println("""
+                所有函数运算符：
+                             以10为底的对数lg, 以e为底的对数ln, 双曲正弦函数sh, 双曲余弦函数ch, 双曲正切th
+                             三角正弦函数sin, 三角余弦函数cos, 三角正切函数tan, 正割函数sec, 余割函数csc, 余切函数cot、
+                             取绝对值abs, 计算e的x次方exp, 求最大公约数gcd, 求最小公倍数lcm,
+                             计算排列数A(n,m)perm，计算组合数C(n,m)comb,
+                             将一个数转为以π为因子的式子pify, 将一个数转为分式frac, 正平方根sqrt,
+                             反双曲正弦函数arsh, 反双曲余弦函数arch, 反双曲正切函数arth,
+                             向上取整ceil, 向下取整floor, 四舍五入round, 判断素数prime,
+                             反三角正弦函数arcsin, 反三角余弦函数arccos, 反三角正切函数arctan,素因子分解factor
+                
+                除gcd、lcm以外的全部函数的使用格式：函数名 参数
+                只需要在函数名后面跟一个属于它的参数即可，中间的空格可以忽略，例如：arctan1、pify20等等。
+                使用案例：
+                求以10为底，100的对数：
+                    lg 100                 计算结果：2
+                求以e为底，e平方的对数：
+                ln (Eu ^ 2)、ln(Eu * Eu)    计算结果：2
+                求根号10：
+                    sqrt 10                 计算结果：3.1622776601683795
+                判断247是否是素数：
+                    prime 247               计算结果：false
+                求π/6的正弦值：
+                    sin(PI/6)               计算结果：0.49999999999999994
+                求-3.5的绝对值：
+                    abs(-3.5)               计算结果：3.5
+                将247进行素因子分解：
+                    factor 247              计算结果：13 * 19
+                将0.4166666666666667转换为分式：
+                    frac 0.4166666666666667  计算结果：5/12
+                将1.3089969389957472转换为带π的分式：
+                    pify 1.3089969389957472  计算结果：(5/12)π
+                
+                在全部的函数中，只有gcd和lcm为二元函数，它们的使用方式是：参数1 函数名 参数2,空格同样可以忽略。
+                使用案例：
+                求72与36的最大公约数：
+                    108 gcd 60、60 gcd 108   计算结果：12
+                求120与24的最小公倍数：
+                    35 lcm 28、28 lcm 35     计算结果：140
+                
+                所有函数中，prime、pify、frac、factor这些函数的使用有限制，由于它们的计算结果不能继续参与运算，
+                所以它们一般单独使用或者在计算式的最后调用，
+                使用案例：
+                1.单独使用：
+                    prime 247、pify Eu、frac 2.75、factor 284
+                2.在计算式的最后调用：
+                    prime(23 * 7 + lg 100)                  计算结果：true
+                    pify(arcsin(sqrt(3) / 2))               计算结果：(1/3)π
+                    factor(12 * 7 + 4 ^ 5 - round(Eu * PI)) 计算结果：7 * 157
+                """);
+        }
+        if(key.contains("sh")){
+            System.out.println("sh      双曲正弦函数,sh x = (e^x - 1/e^x) / 2，定义域(-∞,∞)，值域(-∞,∞)");
+            System.out.println("arsh    反双曲正弦函数,arsh = ln(x + sqrt(x ^ 2 + 1)),定义域(-∞,∞)，值域(-∞,∞)");
+        }
+        if(key.contains("ch")){
+            System.out.println("ch      双曲余弦函数,ch x = (e^x + 1/e^x) / 2，定义域(-∞,∞)，值域[1,∞]");
+            System.out.println("arch    反双曲余弦函数,arch = ln(x + sqrt(x ^ 2 - 1)),定义域(-∞,∞)，值域[0,∞)");
+        }
+        if(key.contains("th")){
+            System.out.println("th      双曲正切，th = sh / ch = (e^x - 1/e^x)/(e^x + 1/e^x)，定义域(-∞,∞)，值域(-1,1)");
+            System.out.println("arth    反三角正切函数,arth = ln[(1+x)/(1-x)] / 2,定义域[-1,1]，值域(-∞,∞)");
+        }
+        if(key.contains("lg"))
+            System.out.println("lg      以10为底的对数，定义域(0,∞)，值域(-∞,∞)");
+        if(key.contains("ln"))
+            System.out.println("ln      以自然常数e为底的对数，定义域(0,∞)，值域(-∞,∞)");
+        if(key.contains("sin")) {
+            System.out.println("sin     三角正弦函数,定义域(-∞,∞)，值域[-1,1]");
+            System.out.println("arcsin  反三角正弦函数,定义域(-∞,∞)，值域(-π/2,π/2)");
+        }
+        if(key.contains("cos")){
+            System.out.println("cos     三角余弦函数,定义域(-∞,∞)，值域[-1,1]");
+            System.out.println("arccos  反三角余弦函数,定义域(-∞,∞)，值域(-π/2,π/2)");
+        }
+        if(key.contains("tan")){
+            System.out.println("tan     三角正切函数,定义域{x|x != π/2 + kπ,k可取所有整数} 值域(-∞,∞)");
+            System.out.println("arctan  反三角正切函数,定义域{x|x!= π/2 + kπ,k可取所有整数}，值域(-∞,∞)");
+        }
+        if(key.contains("sec"))
+            System.out.println("sec     正割函数,sec x = 1 / cos x定义域(-∞,∞)，值域[-∞,-1]和[1,∞]");
+        if(key.contains("csc"))
+            System.out.println("csc     余割函数,csc x = 1 / sin x,定义域(-∞,∞)，值域[∞,-1]和[1,∞]");
+        if(key.contains("cot"))
+            System.out.println("cot     余切函数,cot x = 1 / tan x,定义域{x|x != kπ,x != π/2 + kπ,k可取所有整数} 值域(-∞,∞)");
+        if(key.contains("abs"))
+            System.out.println("abs     取绝对值，abs x = |x|,定义域(-∞,∞)，值域[0,∞)");
+        if(key.contains("exp"))
+            System.out.println("exp     计算e的x次方，exp(x) = e ^ x,定义域(-∞,∞)，值域(0,∞)");
+        if(key.contains("gcd"))
+            System.out.println("gcd     求两个数的最大公约数,如果参数为小数，那么将自动将该参数向下取整再进行计算");
+        if(key.contains("lcm"))
+            System.out.println("lcm     求两个数的最小公倍数,如果参数为小数，那么将自动将该参数向下取整再进行计算");
+        if(key.contains("perm"))
+            System.out.println("perm    计算排列数A(n,m),perm(n,m)计算从n个元素中任取m个元素的所有排列的个数");
+        if(key.contains("comb"))
+            System.out.println("comb    计算组合数C(n,m),comb(n,m)计算从n个不同的元素中任取m个元素的并排成一组的所有组合的个数");
+        if(key.contains("pify"))
+            System.out.println("pify    将一个数转为以π为因子的式子,例如pify(1.75*π) = π + (3/4)*π,pify只能单独使用");
+        if(key.contains("frac"))
+            System.out.println("frac    将一个数转换成分式，例如frac(3.75) = 15/4,frac(0.4166666666) = 5/12,frac只能单独使用");
+        if(key.contains("sqrt"))
+            System.out.println("sqrt    sqrt x = x ^ 0.5,计算正平方根,例如sqrt(36) = 6");
+        if(key.contains("ceil"))
+            System.out.println("ceil    向上取整,ceil x得到最接近x且大于x的整数,例如：ceil 3.1 = 4,ceil(-3.5) = -3");
+        if(key.contains("floor"))
+            System.out.println("floor   向下取整,ceil x得到最接近x且小于x的整数,例如：floor 3.9 = 3,floor(-3.1) = -4");
+        if(key.contains("round"))
+            System.out.println("round   四舍五入,例如：round 2.4 = 2,round 2.5 = 3,round(-2.5) = -2");
+        if(key.contains("prime"))
+            System.out.println("prime   判断一个数是否为素数,prime只能单独使用");
+        if(key.contains("factor"))
+            System.out.println("factor  素因子分解，将一个数分解成多个素数的乘积,例如factor (72) = (2^3) * (3^2),factor只能单独使用");
     }
 
     static void console() throws IOException {
@@ -3225,7 +3573,7 @@ public class AntiPolish {
                 System.out.println("查看所有变量 - - - - - - - - - - - - var");
                 System.out.println("计算 - - - - - - - - - - - - - - - antipo");
                 System.out.println("查看所有输入过的计算表达式 - - - - - - -ls");
-                System.out.println("查看所有函数 - - - - - - - - - - - - func");
+                System.out.println("函数使用 - - - - - - - - - - - - - - func");
                 System.out.println("多项式计算器 - - - - - - - - - - - - -poly");
                 System.out.println("帮助 - - - - - - - - - - - - - - - -help");
                 System.out.println("修改配置信息 - - - - - - - - - - - - -config");
