@@ -1,0 +1,10 @@
+ifShowAntiPolish = true
+ifShowProcess = true
+ifShowMenu = true
+inputAnchor = $
+data = data
+configPath = data\config.txt
+logPath = data\log.txt
+defaultReadPath = data\defaultReadPath.txt
+defaultSavePath = data\defaultSavePath.txt
+maxDenominator = 100000
